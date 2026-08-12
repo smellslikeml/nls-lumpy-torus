@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NLS on the Lumpy Torus — gallery</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1c2230; --muted:#5c6672;
+    --line:#e3e7ec; --accent:#2b6cb0; --accent2:#b83280;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 20px 80px}
+  header{padding:56px 0 28px;border-bottom:1px solid var(--line);margin-bottom:8px}
+  h1{font-size:34px;line-height:1.15;margin:0 0 10px;letter-spacing:-.02em}
+  .eq{font-family:"SFMono-Regular",Consolas,Menlo,monospace;background:#eef1f5;
+    padding:2px 7px;border-radius:5px;font-size:.92em}
+  .lede{color:var(--muted);max-width:70ch;margin:0}
+  .lede a{color:var(--accent);text-decoration:none;border-bottom:1px solid #cdd8e6}
+  section{margin:44px 0 0}
+  h2{font-size:21px;margin:0 0 4px;letter-spacing:-.01em}
+  h2 .num{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:10px;font-weight:600}
+  .sub{color:var(--muted);margin:0 0 20px;max-width:78ch}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+  figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:12px;
+    overflow:hidden;box-shadow:0 1px 2px rgba(20,30,50,.04)}
+  figure.wide{grid-column:1 / -1}
+  figure img{display:block;width:100%;height:auto;background:#fff}
+  figcaption{padding:12px 16px 15px;font-size:13.5px;color:var(--muted);border-top:1px solid var(--line)}
+  figcaption b{color:var(--ink);font-weight:600}
+  .tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;
+    text-transform:uppercase;color:#fff;background:var(--accent);border-radius:4px;
+    padding:1px 7px;margin-right:8px;vertical-align:1.5px}
+  .tag.warn{background:var(--accent2)}
+  footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);
+    color:var(--muted);font-size:13px}
+  code{font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:.9em;
+    background:#eef1f5;padding:1px 5px;border-radius:4px}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}h1{font-size:27px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>NLS on the Lumpy Torus</h1>
+  <p class="lede">Nonlinear Schrödinger evolution on a surface of revolution with metric
+    <span class="eq">ds² = dx² + A(x)²dθ²</span>, <span class="eq">A(x)=√((1+cos²x)/2)</span>.
+    Finite-element mass-conserving Laplace–Beltrami assembly, Crank–Nicolson time-stepping,
+    Picard nonlinear solve with a convergence check. A Python companion to
+    <a href="https://smellslike.ml/posts/nls-on-the-lumpy-torus/">the lumpy-torus study</a>.
+    All 3-D frames are rendered on the metric-faithful <b>crescent immersion</b>.</p>
+</header>
+
+<section>
+  <h2><span class="num">01</span>Geometry &amp; curvature</h2>
+  <p class="sub">Over exactly one period <span class="eq">x∈[−π/2, π/2]</span> (ends identified) the
+    surface has exactly <b>one elliptic</b> closed geodesic (the belly, <span class="eq">A=1</span>,
+    <span class="eq">K=+0.5</span>) and <b>one hyperbolic</b> one (the neck, <span class="eq">A=0.707</span>,
+    <span class="eq">K=−1</span>).</p>
+  <div class="grid">
+    <figure class="wide">
+      <img src="curvature_view.png" alt="curvature view" loading="lazy">
+      <figcaption><b>Left:</b> the isometric immersion — a single neck–belly–neck bump (A is the
+        distance from the axis, so it never closes into a donut). <b>Middle:</b> bent closed into the
+        asymmetric <b>crescent torus</b> used for every field render, colored by Gaussian curvature
+        <span class="eq">K=−A″/A</span>. <b>Right:</b> the quantities the Laplace–Beltrami operator sees —
+        <span class="eq">A</span>, <span class="eq">1/A²</span> (θ-coupling, peaks at the necks), and
+        <span class="eq">K</span>.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">02</span>Solver validation</h2>
+  <p class="sub">The diagnostics the reference FreeFEM script omitted entirely.</p>
+  <div class="grid">
+    <figure class="wide">
+      <img src="conservation.png" alt="conservation" loading="lazy">
+      <figcaption><b>Mass conserved to ~10⁻¹³</b> (machine precision) and energy to ~10⁻⁵ (bounded,
+        no secular drift) over 1000 Crank–Nicolson steps; peak <span class="eq">|u|²</span> shows the
+        beam dispersing then partially refocusing along the geodesic.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">03</span>The field on the lumpy torus</h2>
+  <p class="sub">A focusing wavepacket, on the crescent and on the computational <span class="eq">(x,θ)</span> chart.</p>
+  <div class="grid">
+    <figure>
+      <img src="nls_lumpy_torus.gif" alt="wavepacket on torus" loading="lazy">
+      <figcaption><span class="tag">3-D</span><span class="eq">|u|²</span> on the crescent immersion.</figcaption>
+    </figure>
+    <figure>
+      <img src="nls_chart.gif" alt="wavepacket on chart" loading="lazy">
+      <figcaption><span class="tag">chart</span>The same field on the <span class="eq">(x,θ)</span> torus chart.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">04</span>Geodesic stability (linear)</h2>
+  <p class="sub">A ring beam launched on the elliptic equator vs the hyperbolic neck.</p>
+  <div class="grid">
+    <figure>
+      <img src="nls_geodesic_elliptic.gif" alt="elliptic beam" loading="lazy">
+      <figcaption><b>Elliptic (belly).</b> The ring stays a confined bright band on the fat side —
+        the stable closed geodesic.</figcaption>
+    </figure>
+    <figure>
+      <img src="nls_geodesic_hyperbolic.gif" alt="hyperbolic beam" loading="lazy">
+      <figcaption><b>Hyperbolic (neck).</b> The ring disperses off the pinch — the unstable geodesic.</figcaption>
+    </figure>
+    <figure class="wide">
+      <img src="geodesic_comparison.png" alt="geodesic comparison" loading="lazy">
+      <figcaption>Transverse RMS width stays bounded on the elliptic equator; on the neck it swings
+        ~2× larger as the beam rolls off the centrifugal barrier.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">05</span>Running over the bumps: the meridian beam</h2>
+  <p class="sub">A beam concentrated along a meridian, crossing belly and necks.</p>
+  <div class="grid">
+    <figure>
+      <img src="nls_meridian_torus.gif" alt="meridian beam torus" loading="lazy">
+      <figcaption><span class="tag">3-D</span>The meridian beam over the bumps.</figcaption>
+    </figure>
+    <figure>
+      <img src="nls_meridian_chart.gif" alt="meridian beam chart" loading="lazy">
+      <figcaption><span class="tag">chart</span>The same on the <span class="eq">(x,θ)</span> chart.</figcaption>
+    </figure>
+    <figure class="wide">
+      <img src="meridian_diag.png" alt="meridian diagnostic" loading="lazy">
+      <figcaption>The physical transverse width tracks the Jacobi field <span class="eq">J(x)=A(x)</span>:
+        the <b>necks focus</b> (meridians converge where A is small) and the <b>belly defocuses</b> —
+        the same as a sphere, whose meridians converge at the poles and diverge at the equator.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">06</span>Semiclassical beam</h2>
+  <p class="sub">A narrow, high-momentum beam surfing the crescent loop; in this regime the geometry
+    (not diffraction) controls the transverse width.</p>
+  <div class="grid">
+    <figure>
+      <img src="nls_semiclassical_torus.gif" alt="semiclassical surf" loading="lazy">
+      <figcaption><span class="tag">q=20</span>The beam surfs around the crescent, through the neck and
+        over the belly.</figcaption>
+    </figure>
+    <figure>
+      <img src="semiclassical_breathing.png" alt="semiclassical breathing" loading="lazy">
+      <figcaption>Physical transverse width tracks <span class="eq">A(beam)</span> — compress at the
+        necks, expand over the belly — on top of an overall diffractive spread.</figcaption>
+    </figure>
+    <figure>
+      <img src="nls_semiclassical_hires_torus.gif" alt="hires semiclassical" loading="lazy">
+      <figcaption><span class="tag">q=40 · 300²</span>Higher resolution: a crisper, more ray-like beam.</figcaption>
+    </figure>
+    <figure>
+      <img src="semiclassical_hires_breathing.png" alt="hires breathing" loading="lazy">
+      <figcaption>The breathing locks tightly to the geometry, with a clear <b>focal brightening at the
+        first neck</b> (peak 1.0→1.22) before diffraction takes over. Mass &amp; energy to ~10⁻¹⁵.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">07</span>Self-trapping via focusing nonlinearity</h2>
+  <p class="sub">On the stable equator a θ-symmetric ring reduces to 1-D — subcritical, so the focusing
+    nonlinearity can self-trap it into a soliton.</p>
+  <div class="grid">
+    <figure>
+      <img src="nls_selftrap_linear_torus.gif" alt="linear ring" loading="lazy">
+      <figcaption><b>Linear</b> whispering-gallery ring — breathes in the well.</figcaption>
+    </figure>
+    <figure>
+      <img src="nls_selftrap_focusing_torus.gif" alt="focusing ring" loading="lazy">
+      <figcaption><b>Focusing</b> self-traps it tighter and brighter — a persistent quasimode.</figcaption>
+    </figure>
+    <figure class="wide">
+      <img src="selftrap_comparison.png" alt="selftrap comparison" loading="lazy">
+      <figcaption>Focusing holds the ring at smaller width and higher peak than the linear mode.</figcaption>
+    </figure>
+    <figure>
+      <img src="nls_selftrap_collapse_torus.gif" alt="selftrap collapse" loading="lazy">
+      <figcaption><span class="tag warn">amp = 5</span>The width locks into a tight soliton, then the ring
+        fragments into hot spots.</figcaption>
+    </figure>
+    <figure>
+      <img src="selftrap_collapse.png" alt="collapse diagnostic" loading="lazy">
+      <figcaption>The azimuthal symmetry-breaking grows <b>exponentially from machine roundoff</b>
+        (<span class="eq">10⁻¹⁵→10⁻¹</span>, straight on a log axis) and triggers mass-critical collapse
+        at <span class="eq">t≈1.8</span>.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<footer>
+  Generated from the solver in <code>nls_lumpy_torus.py</code> and the render scripts
+  (<code>render*.py</code>, <code>curvature_view.py</code>, <code>hero.py</code>). Every 3-D frame uses the
+  crescent embedding <code>torus_embedding</code> — the metric-faithful profile
+  <span class="eq">(A(x), z(x))</span> bent closed (<span class="eq">x</span> → toroidal, <span class="eq">θ</span> → poloidal).
+</footer>
+
+</div>
+</body>
+</html>
