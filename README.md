@@ -185,7 +185,42 @@ geometry. All `*_torus.gif` render on it.
 - `defocusing.py` → `nls_defocusing_*.gif` — dispersive-shock / rarefaction regime.
 - `spacetime_carpet.py` → `spacetime_carpet.png` — Talbot revivals on the belly ring.
 
+## Research directions — geometry as a control field
+
+The tunable metric (via `eps` in `build_operators` / `profile_A`) is a laboratory:
+
+- `mc_geometry.py` → `mc_geometry.png` — **geometry tunes the blow-up**: collapse-time
+  vs mass separates across lump depths — deeper necks collapse sooner and at lower
+  mass, so the mass-critical threshold is a geometric knob (the blow-up the post
+  set out to induce).
+- `chaos.py` → `chaos_poincare.png` — breaking axisymmetry turns the integrable
+  geodesic flow chaotic (KAM island in a chaotic sea) — the stage for scarring.
+- `lattice.py` → `lattice.png` — corrugation as an intrinsic lattice: whispering-
+  gallery Bloch bands (periodic) → Anderson localization (disordered).
+- `soliton_barrier.py` → `soliton_barrier.png` — a bright soliton librating in the
+  belly well vs circulating over the necks.
+- `faraday.py` → `faraday.png` — a breathing torus parametrically amplifies a
+  Bogoliubov mode (Faraday waves); the monotonic-expansion version is the analogue
+  of cosmological particle production.
+- `lle.py` — driven-dissipative (Lugiato–Lefever) scaffold for geometry-pinned Kerr
+  solitons (a microtoroid *is* a lumpy torus); robust nucleation needs a detuning
+  ramp — a next step, not a finished figure.
+
+**Application-grounded next experiments:** geometric dispersion-engineering of
+microcombs (inverse-design `A(x)`); the neck as a de Laval nozzle → analog-Hawking
+horizon; vortices on a curved superfluid shell (Cold-Atom-Lab bubble BECs);
+chiral-twist topological whispering-gallery bands; a neural operator on the
+manifold closing the post's ML-for-PDE loop.
+
 ## Background & references
+
+**Direct backbone:** Albin, Christianson, Marzuola & Thomann, *Nonlinear quasimodes
+near elliptic periodic geodesics* (2011, arXiv:1103.3253) — the NLS keeps a quasimode
+localized on the elliptic orbit (our self-trapping). Godet, *Blow up on a curve for a
+NLS on Riemannian surfaces* (2012, arXiv:1204.3301) — focusing NLS blowing up on a
+curve, log-log rate, on rotationally-symmetric surfaces (our collapse). Also Sulem &
+Sulem, *The Nonlinear Schrödinger Equation*; Kac, *Can one hear the shape of a drum?*
+
 
 The experiment sits on a well-worn thread of geometry and physics.
 

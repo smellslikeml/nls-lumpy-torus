@@ -29,21 +29,23 @@ from scipy.sparse.linalg import splu
 
 
 # ----------------------------------------------------------------------------- metric
-def profile_A(x):
-    return np.sqrt((1.0 + np.cos(x) ** 2) / 2.0)
+def profile_A(x, eps=1.0):
+    # tunable lump amplitude: A(belly)=1, A(neck)=1/sqrt(1+eps); eps=1 is the study's torus
+    return np.sqrt((1.0 + eps * np.cos(x) ** 2) / (1.0 + eps))
 
 
 # ----------------------------------------------------------------------- FE operators
-def build_operators(Nx, Nth, Lx=np.pi, x0=-np.pi / 2.0):
+def build_operators(Nx, Nth, Lx=np.pi, x0=-np.pi / 2.0, eps=1.0):
     """Return grid + (K stiffness sparse, Mdiag lumped-mass diagonal vector).
 
     Node ordering is flattened (i in x, j in theta) -> i*Nth + j.
+    eps tunes the lump amplitude (eps=1 is the study's torus).
     """
     dx = Lx / Nx
     dth = 2.0 * np.pi / Nth
     x = x0 + dx * np.arange(Nx)          # periodic over [x0, x0+Lx)
     th = dth * np.arange(Nth)            # periodic over [0, 2pi)
-    A = profile_A(x)                     # (Nx,)
+    A = profile_A(x, eps)                # (Nx,)
 
     # --- 1D x-stiffness  int A u_x v_x dx  (periodic, face-averaged A) ---
     Aface = 0.5 * (A + np.roll(A, -1))   # A_{i+1/2}

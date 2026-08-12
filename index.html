@@ -40,6 +40,13 @@
   .refs b{color:var(--ink)} .refs a{color:var(--accent);text-decoration:none;border-bottom:1px solid #cdd8e6}
   footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
   code{font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:.9em;background:#eef1f5;padding:1px 5px;border-radius:4px}
+  .story{margin:30px 0 8px;padding:20px 24px;background:linear-gradient(180deg,#fff,#fbfcfe);
+    border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px}
+  .story p{margin:0 0 12px;color:#33404f} .story p:last-child{margin:0}
+  .story b{color:var(--ink)} .story a{color:var(--accent);text-decoration:none;border-bottom:1px solid #cdd8e6}
+  .note{grid-column:1/-1;background:#fbfcfe;border:1px dashed var(--line);border-radius:12px;
+    padding:15px 20px;font-size:13.8px;color:var(--muted)}
+  .note b{color:var(--ink)} .note a{color:var(--accent);text-decoration:none;border-bottom:1px solid #cdd8e6}
   @media(max-width:680px){.grid{grid-template-columns:1fr}h1{font-size:27px}}
 </style>
 </head>
@@ -54,6 +61,22 @@
     A Python companion to <a href="https://smellslike.ml/posts/nls-on-the-lumpy-torus/">the lumpy-torus study</a>.
     All 3-D frames are rendered on the metric-faithful <b>crescent immersion</b>.</p>
 </header>
+
+<div class="story">
+  <p><b>The question.</b> This surface is engineered to ask one thing, posed in the
+    <a href="https://smellslike.ml/posts/nls-on-the-lumpy-torus/">source post</a>: can a focusing
+    nonlinearity, working <i>with</i> the curvature, concentrate a wave hard enough along a stable geodesic
+    to blow up in finite time? It sits at the meeting of three threads — dispersive PDE, spectral geometry,
+    and semiclassical analysis — and the geometry makes them visible: a <b>belly</b> where the equatorial
+    geodesic is stable (elliptic) and <b>necks</b> where it is not (hyperbolic).</p>
+  <p><b>The arc.</b> The linear geometry already traps waves — whispering-gallery quasimodes bound in the
+    centrifugal well (§02). Turn on focusing and those become the <i>nonlinear</i> quasimodes that
+    Albin–Christianson–Marzuola–Thomann proved stay localized near an elliptic geodesic (§08). Push the mass
+    up and the trapped ring undergoes mass-critical collapse — the blow-up itself, which Godet made rigorous
+    <i>on a curve</i> for rotationally-symmetric surfaces at the log-log rate. Then §10 turns the geometry
+    into a control field and goes past the original question, into chaos, lattices, parametric amplification,
+    and device design.</p>
+</div>
 
 <section>
   <h2><span class="num">01</span>Geometry &amp; curvature</h2>
@@ -197,10 +220,60 @@
 </section>
 
 <section>
-  <h2><span class="num">10</span>Background &amp; references</h2>
+  <h2><span class="num">10</span>Research directions — geometry as a control field</h2>
+  <p class="sub">The same tunable metric is a laboratory. Each panel is a proof-of-concept for a direction
+    where surface geometry <i>steers</i> nonlinear wave dynamics — some clean results, some sketches of open
+    questions, all runnable from the same solver.</p>
+  <div class="grid">
+    <figure class="wide"><img src="mc_geometry.png" alt="collapse threshold vs geometry" loading="lazy">
+      <figcaption><b>Geometry tunes the blow-up.</b> Collapse-onset time vs ring mass for four lump depths —
+        the curves <b>separate</b>: deeper necks (larger <span class="eq">ε</span>) collapse sooner and at
+        lower mass. So the mass-critical (necklace) collapse — the blow-up the post set out to induce — is a
+        knob the geometry turns, not a fixed number.</figcaption></figure>
+    <figure class="wide"><img src="chaos_poincare.png" alt="geodesic chaos" loading="lazy">
+      <figcaption><b>Break the axisymmetry, break integrability.</b> Adding a θ-lump shatters the nested KAM
+        curves into a chaotic sea with a surviving belly island — the classical stage for quantum scarring
+        of the eigenfunctions, and for nonlinear transport in a mixed phase space.</figcaption></figure>
+    <figure class="wide"><img src="lattice.png" alt="geometric lattice and Anderson" loading="lazy">
+      <figcaption><b>Corrugation is an intrinsic lattice.</b> A periodic lump chain makes
+        <span class="eq">V_k=k²/A²</span> a periodic potential → whispering-gallery <b>Bloch bands</b> with
+        gaps; random lumps → <b>Anderson-localized</b> modes. No external potential — the geometry is the
+        lattice (and the disorder).</figcaption></figure>
+    <figure class="wide"><img src="soliton_barrier.png" alt="soliton trapping vs escape" loading="lazy">
+      <figcaption><b>A soliton in the geometric well.</b> A small kick leaves a bright soliton librating in
+        the belly; a larger one sends it circulating over the necks — the nonlinear echo of the geodesic
+        island/separatrix (§02).</figcaption></figure>
+    <figure class="wide"><img src="faraday.png" alt="Faraday parametric amplification" loading="lazy">
+      <figcaption><b>A breathing torus amplifies.</b> Periodically modulating the geometry parametrically
+        pumps a Bogoliubov mode out of noise (Faraday waves, driven at <span class="eq">Ω=2ω_n</span>). Run
+        as a monotonic expansion instead, this is the NLS analogue of cosmological particle production.</figcaption></figure>
+    <div class="note"><b>Driven-dissipative (scaffolded, <code>lle.py</code>).</b> A lump should pin a
+      dissipative Kerr soliton — the soliton-microcomb regime, and a microtoroid resonator <i>is</i> a lumpy
+      torus. Robust cavity-soliton nucleation needs a detuning-ramp protocol (a clean next step) rather than
+      a seeded pulse, so this one is left as an honest scaffold, not a finished figure.</div>
+    <div class="note"><b>Where this goes next — application-grounded.</b> geometric <b>dispersion
+      engineering</b> of microcombs (inverse-design <span class="eq">A(x)</span> for a target modal
+      dispersion); the <b>neck as a de Laval nozzle</b> → a geometry-provided sonic horizon / analog-Hawking
+      experiment; <b>vortices on a curved superfluid shell</b> (Cold-Atom-Lab bubble BECs) and their
+      curvature pinning; a <b>chiral lump twist</b> for topological whispering-gallery bands; and a
+      <b>neural operator</b> on the manifold to close the post's own ML-for-PDE loop.</div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">11</span>Background &amp; references</h2>
   <p class="sub">The experiment sits on a well-worn thread of geometry and physics — the reduction to a
     centrifugal-barrier problem is the same structure that appears across these lines of work.</p>
   <ul class="refs">
+    <li><b>The direct backbone (what the post is after)</b> — <b>nonlinear quasimodes near a stable geodesic</b>:
+      Albin, Christianson, Marzuola &amp; Thomann,
+      <a href="https://arxiv.org/abs/1103.3253"><i>Nonlinear quasimodes near elliptic periodic geodesics</i> (2011)</a>
+      — the NLS keeps a quasimode localized on the elliptic orbit (our self-trapping, §08); and
+      <b>rigorous blow-up on a curve</b>: Godet,
+      <a href="https://arxiv.org/abs/1204.3301"><i>Blow up on a curve for a NLS on Riemannian surfaces</i> (2012)</a>
+      — focusing NLS blowing up on a curve, at the log-log rate, on rotationally-symmetric surfaces (our
+      collapse, §08–10). Also Sulem &amp; Sulem, <i>The Nonlinear Schrödinger Equation</i>; Kac,
+      <i>Can one hear the shape of a drum?</i> (spectral geometry).</li>
     <li><b>Whispering-gallery modes</b> — Lord Rayleigh, <i>The Problem of the Whispering Gallery</i> (1910);
       realized in ultra-high-Q optical microtoroid resonators: Armani, Kippenberg, Spillane &amp; Vahala,
       <a href="https://www.nature.com/articles/nature01371"><i>Nature</i> <b>421</b>, 925 (2003)</a>.</li>
