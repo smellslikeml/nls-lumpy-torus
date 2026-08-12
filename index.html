@@ -238,8 +238,10 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
       • <b>Stationary flow</b> through the fixed throat → an <b>analog horizon</b>: a transonic superfluid traps
       sound at the neck, a geometry-made black hole.</p>
     <p>Static geometry bends <i>where</i> modes go; dynamic geometry decides <i>which</i> modes exist — the
-      metric becomes a source that mixes the vacuum. (Add a spatial twist to the time-drive and you reach the
-      <b>Floquet-topological</b> route to the edge channels in §10.)</p>
+      metric becomes a source that mixes the vacuum, and it can act back on the nonlinearity itself: breathing
+      the belly resonantly <b>delays or hastens</b> the focusing collapse (§10), the control-knob face of this
+      axis. (Add a spatial twist to the time-drive and you reach the <b>Floquet-topological</b> route to the
+      edge channels in §10.)</p>
   </div>
 
   <div class="grid">
@@ -257,6 +259,11 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
 
 <section>
   <h2><span class="num">03</span>Solver validation</h2>
+  <p class="sub">A focusing equation near blow-up is unforgiving: a scheme that leaks or injects energy will
+    <i>fake</i> a collapse that isn't there, or smother one that is. So the licence for every later claim sits
+    here — the structure-preserving Laplace–Beltrami assembly conserves <span class="eq">∫A|u|²</span> to
+    machine precision and energy to <span class="eq">~10⁻⁵</span> over a thousand steps, so when the ring does
+    collapse (§08) we know it is the physics, not the discretisation.</p>
   <div class="grid">
     <figure class="wide"><img src="conservation.png" alt="conservation" loading="lazy">
       <figcaption><b>Mass conserved to ~10⁻¹³</b> and energy to ~10⁻⁵ over 1000 Crank–Nicolson steps —
@@ -266,6 +273,10 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
 
 <section>
   <h2><span class="num">04</span>The field on the lumpy torus</h2>
+  <p class="sub">Two views of the same field, and it pays to read both. The <b>crescent immersion</b> is what
+    the surface <i>looks</i> like; the <span class="eq">(x,θ)</span> <b>chart</b> is where the operator
+    <i>lives</i> — where <span class="eq">θ</span>-Fourier diagonalises the linear flow and the centrifugal
+    potential <span class="eq">k²/A²</span> is plain to see. Every animation below is one view or the other.</p>
   <div class="grid">
     <figure><img src="nls_lumpy_torus.gif" alt="wavepacket on torus" loading="lazy">
       <figcaption><span class="tag">3-D</span><span class="eq">|u|²</span> on the crescent immersion.</figcaption></figure>
@@ -276,6 +287,10 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
 
 <section>
   <h2><span class="num">05</span>Geodesic stability (linear)</h2>
+  <p class="sub">Before any nonlinearity, put the geometry's own question (§02) to the test: launch a beam
+    along a parallel geodesic and watch its transverse width. On the <b>elliptic</b> belly the Jacobi field
+    stays bounded and the beam holds together; on the <b>hyperbolic</b> neck it grows and the beam sheds off
+    the pinch. Stable vs unstable orbit, side by side — the linear skeleton every later panel hangs on.</p>
   <div class="grid">
     <figure><img src="nls_geodesic_elliptic.gif" alt="elliptic beam" loading="lazy">
       <figcaption><b>Elliptic (belly).</b> A confined bright band — the stable geodesic.</figcaption></figure>
@@ -288,6 +303,10 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
 
 <section>
   <h2><span class="num">06</span>Running over the bumps: the meridian beam</h2>
+  <p class="sub">The meridians are the <i>other</i> geodesic family — and unlike the equator they are not stable
+    orbits: each one crosses the <span class="eq">K&gt;0</span> belly <i>and</i> the <span class="eq">K&lt;0</span>
+    necks, so its transverse width solves a Hill/Floquet equation, not a harmonic one. The prediction: focus at
+    the necks, defocus over the belly — exactly as meridians converge at a sphere's poles.</p>
   <div class="grid">
     <figure><img src="nls_meridian_torus.gif" alt="meridian torus" loading="lazy">
       <figcaption><span class="tag">3-D</span>A beam concentrated along a meridian, crossing belly and necks.</figcaption></figure>
@@ -299,6 +318,10 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
 
 <section>
   <h2><span class="num">07</span>Semiclassical beam</h2>
+  <p class="sub">Push the angular momentum high — the semiclassical limit — and the ray/wave correspondence
+    sharpens into view: the packet becomes a true <b>Gaussian beam</b> (the FIO parametrix of §02) riding the
+    geodesic, its width breathing as <span class="eq">A</span> around the loop. Geometric optics on the
+    manifold, made literal.</p>
   <div class="grid">
     <figure><img src="nls_semiclassical_torus.gif" alt="semiclassical surf" loading="lazy">
       <figcaption><span class="tag">q=20</span>The beam surfs the crescent loop, through the neck and over the belly.</figcaption></figure>
@@ -396,6 +419,18 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
         factor rings with <b>Sakharov oscillations</b> (<b>right</b>) — the acoustic analogue of the CMB peaks.
         Exact linear Bogoliubov theory, two-mode-squeeze Wronskian held to <span class="eq">10⁻¹³</span>; the
         NLS realisation of Viermann et al.'s expanding-universe BEC (<i>Nature</i>, 2022).</figcaption></figure>
+    <figure class="wide"><img src="dynamical_stabilization.png" alt="dynamical control of the focusing collapse" loading="lazy">
+      <figcaption><b>Prototype — dynamical control of the collapse (geometry vs the nonlinearity).</b> Breathing
+        the belly makes the effective coupling <span class="eq">g_eff∝1/A²(t)</span> oscillate — "nonlinearity
+        management." It is a <b>resonant</b> knob on the necklace collapse: in a frequency window
+        (<span class="eq">Ω≈40</span>) deep breathing <b>delays</b> the mass-critical blow-up ~<b>5×</b>
+        (<b>left</b>; the delay grows with depth <span class="eq">δ</span>, <b>middle</b>); too slow
+        (<span class="eq">Ω=16</span>) and the drive parametrically feeds the very sidebands that fragment the
+        ring, so it gives no help or even <b>hastens</b> collapse (<b>right</b>). A geometric Kapitza /
+        Feshbach-management effect (Saito–Ueda) — the same idea, <b>dynamic stabilization of a wave
+        instability</b>, that plasma actuators use, and reduced-model kin to Langmuir-wave collapse. Full
+        <i>arrest</i> of the azimuthal collapse would need a faster drive or a different observable — an honest
+        open edge.</figcaption></figure>
     <figure class="wide"><img src="dispersion_design.png" alt="geometric dispersion engineering" loading="lazy">
       <figcaption><b>Prototype — geometric dispersion engineering.</b> The WG spectrum
         <span class="eq">ω_m = E_0(m)</span> <i>is</i> the resonator's modal dispersion, so the lump profile is
@@ -488,7 +523,8 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
     <code>threshold_scan.py</code>, <code>spacetime_carpet.py</code>, <code>defocusing.py</code>,
   <code>hero.py</code>), and the frontier prototypes (<code>faraday.py</code>,
   <code>expanding_torus.py</code>, <code>analog_horizon.py</code>, <code>dispersion_design.py</code>,
-  <code>lattice.py</code>, <code>topological.py</code>, <code>neural_operator.py</code>). Every 3-D frame uses the crescent embedding
+  <code>lattice.py</code>, <code>topological.py</code>, <code>neural_operator.py</code>,
+  <code>dynamical_stabilization.py</code>). Every 3-D frame uses the crescent embedding
   (<span class="eq">x</span> → toroidal, <span class="eq">θ</span> → poloidal).
 </footer>
 
