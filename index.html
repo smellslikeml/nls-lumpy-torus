@@ -167,13 +167,28 @@
 </section>
 
 <section>
-  <h2><span class="num">09</span>Other regimes</h2>
+  <h2><span class="num">09</span>Regimes, instabilities &amp; bifurcation</h2>
+  <p class="sub">What the geometry and the nonlinearity open up beyond the main experiments.</p>
   <div class="grid">
+    <figure class="wide"><img src="bifurcation.png" alt="bifurcation" loading="lazy">
+      <figcaption><b>Elliptic↔hyperbolic bifurcation — the geometry knob.</b> With the tunable family
+        <span class="eq">A(x;ε)=√((1+ε cos²x)/(1+ε))</span> the curvatures are exactly
+        <span class="eq">K_belly=ε/(1+ε)</span>, <span class="eq">K_neck=−ε</span>: belly and neck
+        <b>exchange stability at ε=0</b>. The centrifugal well inverts, and the whispering-gallery
+        bound states switch on as the belly turns elliptic. Our torus is <span class="eq">ε=1</span>.</figcaption></figure>
     <figure><img src="nls_defocusing_torus.gif" alt="defocusing" loading="lazy">
       <figcaption><span class="tag">defocusing</span>Repulsive <span class="eq">σ=+1</span>: a hump expands and
         depletes its core — dispersive-shock / rarefaction dynamics, the opposite of self-trapping.</figcaption></figure>
     <figure><img src="nls_defocusing_chart.gif" alt="defocusing chart" loading="lazy">
       <figcaption><span class="tag">chart</span>The same on the <span class="eq">(x,θ)</span> chart.</figcaption></figure>
+    <figure class="wide"><img src="ring_modulational.png" alt="modulational instability and dark solitons" loading="lazy">
+      <figcaption><b>Modulational instability &amp; dark solitons on the belly ring.</b> <b>Left:</b> a focusing
+        uniform state is <b>Benjamin–Feir unstable</b> — it breaks into a soliton and recurs
+        (Fermi–Pasta–Ulam). <b>Right:</b> in the defocusing regime, two <b>black solitons</b> (stationary
+        density notches with π phase jumps) are stable.</figcaption></figure>
+    <figure class="wide"><img src="threshold.png" alt="collapse threshold" loading="lazy">
+      <figcaption><b>Mass-critical collapse threshold.</b> Below <span class="eq">M_c≈43</span> the focusing ring
+        never collapses; above it the necklace collapse sets in, its onset time falling off with mass.</figcaption></figure>
     <figure class="wide"><img src="spacetime_carpet.png" alt="Talbot carpet" loading="lazy">
       <figcaption><b>Quantum revivals (Talbot carpet).</b> A packet released on the belly ring reforms at
         <span class="eq">t=2π</span> (full revival) and rational fractions — the mechanism behind the
@@ -208,7 +223,8 @@
 <footer>
   Generated from the solver in <code>nls_lumpy_torus.py</code> and the render/analysis scripts
   (<code>render*.py</code>, <code>curvature_view.py</code>, <code>quasimode_ladder.py</code>,
-  <code>geodesic_phase_space.py</code>, <code>spacetime_carpet.py</code>, <code>defocusing.py</code>,
+  <code>geodesic_phase_space.py</code>, <code>bifurcation.py</code>, <code>ring_1d.py</code>,
+    <code>threshold_scan.py</code>, <code>spacetime_carpet.py</code>, <code>defocusing.py</code>,
   <code>hero.py</code>). Every 3-D frame uses the crescent embedding
   (<span class="eq">x</span> → toroidal, <span class="eq">θ</span> → poloidal).
 </footer>

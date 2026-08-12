@@ -170,6 +170,21 @@ geometry. All `*_torus.gif` render on it.
   to machine precision too.
 - Match the post's exact IC/parameters; or a supercritical `p=8` blow-up study.
 
+## Regimes, instabilities & bifurcation
+
+- `bifurcation.py` → `bifurcation.png` — **elliptic↔hyperbolic bifurcation**. Tunable
+  family `A(x;ε)=√((1+ε cos²x)/(1+ε))` gives exactly `K_belly=ε/(1+ε)`,
+  `K_neck=−ε`; belly and neck exchange stability at `ε=0`, the well `V_k` inverts,
+  and the WGM bound states switch on as the belly turns elliptic (`ε=1` is ours).
+- `ring_1d.py` → `ring_modulational.png` — **Benjamin–Feir MI** (focusing uniform
+  state → soliton → Fermi–Pasta–Ulam recurrence) and **dark solitons** (two stable
+  black-soliton notches in the defocusing regime), by exact split-step on the ring.
+- `threshold_scan.py` → `threshold.png` — **mass-critical collapse threshold**:
+  below `M_c≈43` the focusing ring never collapses; above it the necklace collapse
+  onset time falls off with mass.
+- `defocusing.py` → `nls_defocusing_*.gif` — dispersive-shock / rarefaction regime.
+- `spacetime_carpet.py` → `spacetime_carpet.png` — Talbot revivals on the belly ring.
+
 ## Background & references
 
 The experiment sits on a well-worn thread of geometry and physics.
