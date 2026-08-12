@@ -169,3 +169,36 @@ geometry. All `*_torus.gif` render on it.
 - **Discrete-gradient** (Delfour–Fortin–Payre) nonlinear term → energy conserved
   to machine precision too.
 - Match the post's exact IC/parameters; or a supercritical `p=8` blow-up study.
+
+## Background & references
+
+The experiment sits on a well-worn thread of geometry and physics.
+
+**The reduction that grounds it.** Separating `u = e^{ikθ}φ(x)` turns the
+Laplace–Beltrami operator into a 1-D Schrödinger operator with effective
+potential `V_k(x) = k²/A²` — a well at the belly, barriers at the necks: the same
+centrifugal barrier as the radial equation in atomic physics. Its bound states
+are the whispering-gallery quasimodes (`quasimode_ladder.png`). Classically, the
+integrable geodesic flow (Clairaut's relation `A²θ' = const`) has the *identical*
+`L²/A²` effective potential — an elliptic island around the belly, a separatrix
+at the neck (`geodesic_phase_space.png`).
+
+- **Whispering-gallery modes** — Lord Rayleigh, *The Problem of the Whispering
+  Gallery* (1910); realized in ultra-high-Q optical microtoroid resonators:
+  Armani, Kippenberg, Spillane & Vahala, *Nature* **421**, 925 (2003).
+- **Quasimodes / Gaussian beams on stable geodesics** — Ralston, *Comm. Math.
+  Phys.* **51**, 219 (1976); Babich & Buldyrev, *Asymptotic Methods in
+  Short-Wavelength Diffraction Theory*.
+- **NLS on manifolds** — Burq, Gérard & Tzvetkov, *Amer. J. Math.* **126**, 569
+  (2004).
+- **Self-trapping, necklaces, collapse** — the self-trapped ring and its
+  azimuthal breakup are the "necklace beam" instability: Soljačić, Sears & Segev,
+  *Phys. Rev. Lett.* **81**, 4851 (1998); the mass-critical blow-up has a
+  universal profile: Merle & Raphaël, *Invent. Math.* **156**, 565 (2004).
+- **Attractive BEC analogue** — the focusing NLS is the Gross–Pitaevskii
+  equation; the self-trapped ring is a bright matter-wave soliton and the
+  collapse a "Bosenova": Donley et al., *Nature* **412**, 295 (2001).
+- **Revivals** — a packet on the belly ring reforms at rational fractions of the
+  revival time (the Talbot effect): `spacetime_carpet.png`.
+
+Source study: <https://smellslike.ml/posts/nls-on-the-lumpy-torus/>.
