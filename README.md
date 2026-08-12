@@ -20,6 +20,39 @@ or serve via GitHub Pages for a shareable link). Preview:
 |:--:|:--:|:--:|
 | ![elliptic](nls_geodesic_elliptic.gif) | ![hyperbolic](nls_geodesic_hyperbolic.gif) | ![collapse](nls_selftrap_collapse_torus.gif) |
 
+## How the geometry enters — weak form, local expansion, Fourier lens
+
+The metric `ds² = dx² + A²dθ²` has `√|g|=A`, `g^{xx}=1`, `g^{θθ}=1/A²`, so
+
+```
+Δ_g u = (1/A)∂_x(A ∂_x u) + (1/A²)∂²_θ u = u_xx + (A'/A)u_x + (1/A²)u_θθ
+```
+
+**Weak form** the solver assembles (test `v`, closed surface, no boundary term):
+
+```
+stiffness:  ∬ [ A·u_x v̄_x + (1/A)·u_θ v̄_θ ] dx dθ        mass:  ∬ A·u v̄ dx dθ
+```
+
+The metric is just **weights** — `A` on the x-stiffness and the mass, `1/A` on the
+θ-stiffness — giving a Hermitian `K` and a positive diagonal `M`, so
+`∫|u|² = UᴴMU` is conserved exactly (the metric lives inside the invariant).
+
+**Local geometry (Taylor).** Near the belly `x=0`: `A≈1−x²/4`, `1/A²≈1+x²/2`;
+near a neck `x=π/2−ξ`: `A≈(1+ξ²/2)/√2`, `1/A²≈2(1−ξ²)`. So `V_k=k²/A²` is a
+harmonic **well** `≈ k² + ½k²x²` (frequency `ω=k`) at the belly and an
+inverted-parabola **barrier** `≈ 2k²(1−ξ²)` at the neck — which is exactly why the
+quasimodes have width `~k^{-1/2}`, breathe at `ω=k`, and the belly is where energy
+piles up (and can blow up).
+
+**Fourier lens.** In `θ` the linear flow is diagonal (each `e^{ikθ}` sector alone;
+`k²/A²` is the metric-weighted symbol of the angular Laplacian). The nonlinearity
+`|u|²u = û∗û̄∗û` convolves the modes, so the **necklace collapse, Benjamin–Feir,
+and Faraday** waves are the same phenomenon — sideband growth with different gain
+spectra `γ(m)`. Talbot **revivals** are `e^{-in²t}` rephasing (Gauss sums);
+**lattices** are Bloch/Floquet in `x`; **dispersion engineering** shapes the symbol
+`ω_k=E_0(k)`; the **sonic horizon** is a Doppler degeneracy of `ω_k`.
+
 ## Improvements over the reference `nls.edp`
 
 | reference `.edp` | here |
@@ -206,9 +239,16 @@ The tunable metric (via `eps` in `build_operators` / `profile_A`) is a laborator
   solitons (a microtoroid *is* a lumpy torus); robust nucleation needs a detuning
   ramp — a next step, not a finished figure.
 
-**Application-grounded next experiments:** geometric dispersion-engineering of
-microcombs (inverse-design `A(x)`); the neck as a de Laval nozzle → analog-Hawking
-horizon; vortices on a curved superfluid shell (Cold-Atom-Lab bubble BECs);
+**Frontier prototypes (built):**
+- `dispersion_design.py` → `dispersion_design.png` — **geometric dispersion
+  engineering**: inverse-design `A(x)` to flatten the WG modal dispersion
+  `ω_m=E_0(m)` **4.4×** (a broadband soliton-comb grid tuned by geometry).
+- `analog_horizon.py` → `analog_horizon.png` — **the neck as an analog black hole**:
+  a transonic superfluid flow gives a **sonic horizon at the throat** (Hawking
+  temperature `T_H` from the throat surface gravity); upstream sound rays can't
+  cross it.
+
+**Still open:** vortices on a curved superfluid shell (Cold-Atom-Lab bubble BECs);
 chiral-twist topological whispering-gallery bands; a neural operator on the
 manifold closing the post's ML-for-PDE loop.
 
@@ -220,6 +260,9 @@ localized on the elliptic orbit (our self-trapping). Godet, *Blow up on a curve 
 NLS on Riemannian surfaces* (2012, arXiv:1204.3301) — focusing NLS blowing up on a
 curve, log-log rate, on rotationally-symmetric surfaces (our collapse). Also Sulem &
 Sulem, *The Nonlinear Schrödinger Equation*; Kac, *Can one hear the shape of a drum?*
+The frontier prototypes connect to soliton microcombs (Kippenberg, Gaeta, Lipson &
+Gorodetsky, *Science* **361**, 2018) and analog gravity (Barceló, Liberati & Visser,
+*Analogue Gravity*, *Living Rev. Relativity* **14**, 3, 2011).
 
 
 The experiment sits on a well-worn thread of geometry and physics.

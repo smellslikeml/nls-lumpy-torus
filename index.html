@@ -47,6 +47,10 @@
   .note{grid-column:1/-1;background:#fbfcfe;border:1px dashed var(--line);border-radius:12px;
     padding:15px 20px;font-size:13.8px;color:var(--muted)}
   .note b{color:var(--ink)} .note a{color:var(--accent);text-decoration:none;border-bottom:1px solid #cdd8e6}
+  .deriv{margin:0 0 22px;padding:18px 22px;background:#fbfcfe;border:1px solid var(--line);border-radius:10px}
+  .deriv p{margin:0 0 10px;color:#33404f} .deriv b{color:var(--ink)} .deriv p:last-child{margin:0}
+  .deriv pre{margin:10px 0;padding:11px 14px;background:#eef1f5;border-radius:7px;overflow-x:auto;
+    font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:12.8px;line-height:1.55;color:#1c2230}
   @media(max-width:680px){.grid{grid-template-columns:1fr}h1{font-size:27px}}
 </style>
 </head>
@@ -98,6 +102,77 @@
     Schrödinger operator with effective potential <span class="eq">V_k(x)=k²/A²</span> — the same
     centrifugal barrier as the atomic radial equation. Both the quantum modes and the classical
     geodesics live on this well/barrier structure.</p>
+
+  <div class="deriv">
+    <p><b>How the geometry enters the operator.</b> The metric <span class="eq">ds² = dx² + A(x)²dθ²</span>
+      has volume element <span class="eq">√|g| = A</span> and inverse metric
+      <span class="eq">g^{xx}=1, g^{θθ}=1/A²</span>, so the Laplace–Beltrami operator is the flat Laplacian
+      <i>dressed</i> by the metric:</p>
+    <pre>Δ_g u = (1/A) ∂_x(A ∂_x u) + (1/A²) ∂²_θ u  =  u_xx + (A'/A) u_x + (1/A²) u_θθ</pre>
+    <p><b>Weak form</b> (what the solver assembles) — test against v, integrate by parts on the closed
+      surface (no boundary term):</p>
+    <pre>stiffness:  ∫⟨∇u,∇v⟩_g dV = ∬ [ A · u_x v̄_x  +  (1/A) · u_θ v̄_θ ] dx dθ
+mass:                 ∫ u v̄ dV = ∬  A · u v̄  dx dθ</pre>
+    <p>So the geometry is just a set of <b>weights</b>: <span class="eq">A</span> weights the x-stiffness and
+      the mass, <span class="eq">1/A</span> the θ-stiffness. Discretely these become a Hermitian stiffness
+      <span class="eq">K</span> and a positive lumped-diagonal mass <span class="eq">M</span>; because both are
+      symmetric the scheme conserves <span class="eq">∫|u|² = UᴴMU</span> to machine precision — the metric is
+      baked into the conserved quantity.</p>
+    <p><b>The local geometry, in two Taylor expansions.</b> Everything follows from how the generating radius
+      <span class="eq">A</span> behaves at its critical points — near the belly (<span class="eq">x=0</span>)
+      and a neck (<span class="eq">x = π/2 − ξ</span>):</p>
+    <pre>belly:  A(x) ≈ 1 − x²/4        (concave — a maximum),   1/A² ≈ 1 + x²/2
+neck:   A(ξ) ≈ (1/√2)(1 + ξ²/2) (convex  — a minimum),   1/A² ≈ 2(1 − ξ²)</pre>
+    <p>Fed into the angular-momentum potential <span class="eq">V_k = k²/A²</span>:</p>
+    <pre>belly:  V_k ≈ k² + ½ k² x²   →  a harmonic WELL, spring constant k²  (frequency ω = k)
+neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
+    <p>That is the whole story in two lines: the belly is a harmonic trap of frequency
+      <span class="eq">k</span>, so its bound quasimodes have width <span class="eq">~k^{-1/2}</span> and
+      breathe at frequency <span class="eq">k</span> (the semiclassical beam), and its depth
+      <span class="eq">~k²</span> sets how many bind; the neck is a barrier that expels.</p>
+    <p><b>Why the NLS cares.</b> The linear operator sets the stage — well at the belly, barrier at the neck
+      — and <span class="eq">σ|u|²u</span> adds self-attraction. Dynamics is a contest between dispersion
+      (spreading, governed by <span class="eq">Δ_g</span>) and self-focusing. Where the geometry <i>both</i>
+      traps and has positive curvature (the belly), the two conspire: the wave is held in place and pulls
+      itself together — concentration, and above a threshold, blow-up. Where it expels and the curvature is
+      negative (the neck), it spreads. The surface doesn't merely bend the space the wave lives in; it
+      spatially <b>biases the dispersion-vs-focusing balance</b> — which is precisely why a stable geodesic is
+      the place to look for collapse.</p>
+  </div>
+
+  <div class="deriv">
+    <p><b>A Fourier-analytic lens.</b> Almost every panel below is clarified by looking in Fourier space —
+      the dual of the real-space well/barrier picture.</p>
+    <p>• <b>θ-Fourier diagonalizes the linear flow.</b> With <span class="eq">u = Σ_k û_k(x)e^{ikθ}</span> the
+      axisymmetric operator is block-diagonal — each angular momentum evolves alone, and
+      <span class="eq">k²/A²</span> is exactly the θ-Fourier symbol of the angular Laplacian, weighted by the
+      metric. The whispering-gallery ladder is "one Fourier mode at a time."</p>
+    <p>• <b>The nonlinearity is convolution — it couples the modes.</b>
+      <span class="eq">|u|²u = û ∗ û̄ ∗ û</span> mixes angular momenta, and that coupling is the engine of
+      every instability here: it feeds a pump mode into sidebands. The <b>necklace collapse</b>,
+      <b>Benjamin–Feir</b>, and the <b>Faraday</b> waves are the <i>same</i> phenomenon in Fourier space —
+      exponential growth of sideband modes — differing only in their gain spectrum
+      <span class="eq">γ(m)</span>. The ring "fragmenting into hot spots" is an azimuthal Fourier cascade.</p>
+    <p>• <b>Revivals are Fourier rephasing.</b> The Talbot carpet is the phases
+      <span class="eq">e^{-in²t}</span> realigning: at <span class="eq">t=2π</span> every
+      <span class="eq">n²t</span> is a multiple of <span class="eq">2π</span> (full revival); rational
+      fractions give Gauss-sum partial revivals. The recurrence <i>is</i> the Fourier phases coming back.</p>
+    <p>• <b>Lattices are Bloch/Floquet.</b> A periodic lump makes the x-Fourier (Bloch) label
+      <span class="eq">q</span> a good quantum number → the whispering-gallery bands
+      <span class="eq">ω(q)</span>; disorder destroys it, and Anderson localization is the collapse of that
+      Fourier description.</p>
+    <p>• <b>Beams are coherent states, and dispersion &amp; horizons are about the symbol
+      <span class="eq">ω_k</span>.</b> The semiclassical beam is a minimal-uncertainty wavepacket whose
+      breathing is its phase-space cell rotating in the transverse well. The comb-flattening prototype
+      literally shapes the dispersion relation <span class="eq">ω_k=E_0(k)</span> (its curvature
+      <span class="eq">d²ω/dk²</span> is the engineered dispersion), and the sonic horizon is where the flow
+      Doppler-shifts <span class="eq">ω_k</span> until an upstream mode's group velocity vanishes — a
+      degeneracy read straight off the Fourier symbol.</p>
+    <p><b>In one sentence:</b> the geometry writes the dispersion relation <span class="eq">ω_k(x)</span>, the
+      nonlinearity convolves the modes, and every instability, revival, band, and horizon is a statement about
+      how those Fourier modes phase, couple, or degenerate.</p>
+  </div>
+
   <div class="grid">
     <figure class="wide"><img src="quasimode_ladder.png" alt="quasimode ladder" loading="lazy">
       <figcaption><b>Quantum.</b> <span class="eq">V_k</span> is a well at the belly (<span class="eq">A=1</span>)
@@ -247,16 +322,27 @@
       <figcaption><b>A breathing torus amplifies.</b> Periodically modulating the geometry parametrically
         pumps a Bogoliubov mode out of noise (Faraday waves, driven at <span class="eq">Ω=2ω_n</span>). Run
         as a monotonic expansion instead, this is the NLS analogue of cosmological particle production.</figcaption></figure>
+    <figure class="wide"><img src="dispersion_design.png" alt="geometric dispersion engineering" loading="lazy">
+      <figcaption><b>Prototype — geometric dispersion engineering.</b> The WG spectrum
+        <span class="eq">ω_m = E_0(m)</span> <i>is</i> the resonator's modal dispersion, so the lump profile is
+        a design knob. Inverse-designing <span class="eq">A(x)</span> (a few harmonics) flattens the integrated
+        dispersion <b>4.4×</b> over a mode band — a broadband, near-equidistant comb grid engineered by
+        geometry rather than waveguide cross-section.</figcaption></figure>
+    <figure class="wide"><img src="analog_horizon.png" alt="analog sonic horizon at the neck" loading="lazy">
+      <figcaption><b>Prototype — the neck as an analog black hole.</b> A transonic superfluid speeds up through
+        the small-<span class="eq">A</span> throat until the flow speed crosses the sound speed: a
+        <b>sonic horizon provided by the geometry alone</b> (Hawking temperature <span class="eq">T_H</span>
+        set by the throat's surface gravity). The upstream <span class="eq">v−c</span> sound rays diverge from
+        the throat and can never cross it — nothing escapes the interior.</figcaption></figure>
     <div class="note"><b>Driven-dissipative (scaffolded, <code>lle.py</code>).</b> A lump should pin a
       dissipative Kerr soliton — the soliton-microcomb regime, and a microtoroid resonator <i>is</i> a lumpy
       torus. Robust cavity-soliton nucleation needs a detuning-ramp protocol (a clean next step) rather than
       a seeded pulse, so this one is left as an honest scaffold, not a finished figure.</div>
-    <div class="note"><b>Where this goes next — application-grounded.</b> geometric <b>dispersion
-      engineering</b> of microcombs (inverse-design <span class="eq">A(x)</span> for a target modal
-      dispersion); the <b>neck as a de Laval nozzle</b> → a geometry-provided sonic horizon / analog-Hawking
-      experiment; <b>vortices on a curved superfluid shell</b> (Cold-Atom-Lab bubble BECs) and their
-      curvature pinning; a <b>chiral lump twist</b> for topological whispering-gallery bands; and a
-      <b>neural operator</b> on the manifold to close the post's own ML-for-PDE loop.</div>
+    <div class="note"><b>Still open (application-grounded).</b> Two of the frontier directions are prototyped
+      above (dispersion engineering, the analog horizon). Still to build: <b>vortices on a curved superfluid
+      shell</b> (Cold-Atom-Lab bubble BECs) and their curvature pinning; a <b>chiral lump twist</b> for
+      topological whispering-gallery bands; and a <b>neural operator</b> on the manifold to close the post's
+      own ML-for-PDE loop.</div>
   </div>
 </section>
 
@@ -290,6 +376,11 @@
       <a href="https://www.nature.com/articles/35085500"><i>Nature</i> <b>412</b>, 295 (2001)</a>.</li>
     <li><b>Integrable geodesic flow on surfaces of revolution</b> — Clairaut's relation
       <span class="eq">A²θ′ = const</span> (classical).</li>
+    <li><b>What the frontier prototypes connect to</b> — soliton microcombs: Kippenberg, Gaeta, Lipson &amp;
+      Gorodetsky, <a href="https://www.science.org/doi/10.1126/science.aan8083"><i>Dissipative Kerr solitons
+      in optical microresonators</i>, Science <b>361</b> (2018)</a>; analog gravity: Barceló, Liberati &amp;
+      Visser, <a href="https://link.springer.com/article/10.12942/lrr-2011-3"><i>Analogue Gravity</i>,
+      Living Rev. Relativity <b>14</b>, 3 (2011)</a>.</li>
   </ul>
 </section>
 
