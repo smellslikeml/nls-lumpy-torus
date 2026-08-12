@@ -79,7 +79,7 @@
     up and the trapped ring undergoes mass-critical collapse — the blow-up itself, which Godet made rigorous
     <i>on a curve</i> for rotationally-symmetric surfaces at the log-log rate. Then §10 turns the geometry
     into a control field and goes past the original question, into chaos, lattices, parametric amplification,
-    and device design.</p>
+    an expanding-universe analogue, topological edge channels, and device design.</p>
 </div>
 
 <section>
@@ -102,6 +102,21 @@
     Schrödinger operator with effective potential <span class="eq">V_k(x)=k²/A²</span> — the same
     centrifugal barrier as the atomic radial equation. Both the quantum modes and the classical
     geodesics live on this well/barrier structure.</p>
+
+  <div class="deriv">
+    <p><b>Why geodesics at all?</b> Because they are the <i>characteristics of the operator</i>, not a
+      metaphor. The linear part <span class="eq">i∂_t u = −Δ_g u</span> has principal symbol
+      <span class="eq">|ξ|²_g</span>, whose Hamiltonian flow is exactly the <b>geodesic flow</b>. So in the
+      high-frequency (semiclassical) limit a wave packet's <b>centre rides a geodesic</b> and its
+      <b>transverse width obeys the Jacobi equation</b> <span class="eq">J″ + K J = 0</span> along it —
+      geometric optics on a manifold. Geodesic <b>stability</b> then fixes the packet's fate: bounded
+      (oscillatory) Jacobi fields on a stable orbit keep it concentrated (§05, §07); exponentially growing
+      ones on an unstable orbit spread it. The nonlinearity <span class="eq">σ|u|²u</span> is lower-order — it
+      rides <i>on top of</i> this geodesic transport, so a stable geodesic is where a focusing beam stays put
+      long enough to concentrate and blow up (§08). That is the whole reason to ask, first,
+      <i>which geodesic, and is it stable?</i> — and why the classical phase portrait below and the quantum
+      ladder are the same object seen two ways.</p>
+  </div>
 
   <div class="deriv">
     <p><b>How the geometry enters the operator.</b> The metric <span class="eq">ds² = dx² + A(x)²dθ²</span>
@@ -173,6 +188,60 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
       how those Fourier modes phase, couple, or degenerate.</p>
   </div>
 
+  <div class="deriv">
+    <p><b>A pseudodifferential lens — the master lens the others fall out of.</b> Everything above is
+      one statement: the operators here, <span class="eq">−Δ_g</span> and its angular slices
+      <span class="eq">−∂_x² + V_k</span>, are <b>elliptic, self-adjoint pseudodifferential operators
+      (ΨDOs) of order 2</b> on the closed surface, and their <b>principal symbol</b>
+      <span class="eq">σ(−Δ_g)=|ξ|²_g=ξ_x²+k²/A(x)²</span> carries all the geometry. On the torus there
+      are no charts to patch: the ΨDO is a Fourier multiplier <i>dressed</i> by <span class="eq">A(x)</span>
+      — the <b>toroidal quantization</b> of Ruzhansky–Turunen — which is exactly why the Fourier lens above
+      is global and rigorous, not a heuristic.</p>
+    <p>• <b>Geodesics are the bicharacteristics.</b> The Hamiltonian flow of the principal symbol on
+      <span class="eq">T*M</span> <i>is</i> the geodesic flow (Clairaut) — the classical portrait of §02 is
+      the symbol's flow — and <b>Egorov's theorem</b> / <b>propagation of singularities</b> promote it to a
+      theorem: conjugating an observable by the propagator transports its symbol along that flow, so the
+      wavefront set of a solution rides those trajectories and a packet microlocalised over the elliptic belly
+      orbit stays trapped (§05, §08).</p>
+    <p>• <b>The propagator is a Fourier integral operator.</b> <span class="eq">e^{itΔ_g}</span> is an FIO
+      whose canonical relation is that flow; the <b>Gaussian-beam / WKB</b> construction (§07) is its
+      <b>parametrix</b> — phase solving the eikonal (Hamilton–Jacobi) equation, amplitude the transport
+      equation, whose leading term is precisely the <b>Jacobi law</b> <span class="eq">J″+KJ=0</span>. The
+      whispering-gallery quasimodes are the <b>quantization of the elliptic orbit</b> (a harmonic well of
+      frequency <span class="eq">k</span>); the nonlinearity <span class="eq">σ|u|²u</span> is a lower-order
+      rider on this ΨDO transport — not a ΨDO itself, but folded in microlocally by <b>paradifferential
+      calculus</b> (Bony), tamed by the same symbol machinery.</p>
+    <p>• <b>Functional calculus ties off the spectral panels.</b> <span class="eq">f(−Δ_g)</span> is again a
+      ΨDO — which is what makes the heat trace, the Weyl count (<i>"hear the shape"</i>), and the Schrödinger
+      propagator legitimate objects; the quasimode ladder and the revival (Talbot) carpet are two calls to the
+      same calculus. And when the geometry <b>moves</b> (next lens) the FIO's canonical relation moves with it:
+      pair production is the propagator failing to preserve the vacuum's positive-frequency splitting as the
+      symbol's characteristic set sweeps. Framework: M. Taylor,
+      <a href="https://mtaylor.web.unc.edu/wp-content/uploads/sites/16915/2022/05/psidolect.pdf"><i>Lectures on
+      pseudodifferential operators</i></a>; Ruzhansky–Turunen,
+      <a href="https://arxiv.org/abs/0805.2892"><i>Quantization of ΨDOs on the torus</i></a>.</p>
+  </div>
+
+  <div class="deriv">
+    <p><b>A dynamical lens — static geometry → time-varying geometry.</b> Every lens so far fixes
+      <span class="eq">A(x)</span>. Let it <b>move</b>, <span class="eq">A=A(x,t)</span> (equivalently ramp the
+      ring radius / scale factor <span class="eq">a(t)</span>), and the ΨDO becomes a <b>time-dependent
+      family</b>: the dispersion relation <span class="eq">ω_k(t)</span> it writes now sweeps, and a mode that
+      was an eigenstate is pumped into its partners. One new control axis with three faces — all runnable from
+      the same solver, all in §10:</p>
+    <p>• <b>Periodic</b> drive → parametric <b>Faraday</b> resonance: a belly breathing at
+      <span class="eq">Ω=2ω_n</span> amplifies a Bogoliubov mode out of noise.<br>
+      • <b>Monotonic</b> ramp → <b>cosmological particle production</b>: an expanding ring redshifts its modes,
+      <span class="eq">ω_k=ck/a(t)</span>, and the adiabatic vacuum can't follow — phonon pairs appear with a
+      scale-invariant plateau and <b>Sakharov oscillations</b>, the analogue platform of Viermann et al.
+      (<i>Nature</i>, 2022).<br>
+      • <b>Stationary flow</b> through the fixed throat → an <b>analog horizon</b>: a transonic superfluid traps
+      sound at the neck, a geometry-made black hole.</p>
+    <p>Static geometry bends <i>where</i> modes go; dynamic geometry decides <i>which</i> modes exist — the
+      metric becomes a source that mixes the vacuum. (Add a spatial twist to the time-drive and you reach the
+      <b>Floquet-topological</b> route to the edge channels in §10.)</p>
+  </div>
+
   <div class="grid">
     <figure class="wide"><img src="quasimode_ladder.png" alt="quasimode ladder" loading="lazy">
       <figcaption><b>Quantum.</b> <span class="eq">V_k</span> is a well at the belly (<span class="eq">A=1</span>)
@@ -222,8 +291,6 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
   <div class="grid">
     <figure><img src="nls_meridian_torus.gif" alt="meridian torus" loading="lazy">
       <figcaption><span class="tag">3-D</span>A beam concentrated along a meridian, crossing belly and necks.</figcaption></figure>
-    <figure><img src="nls_meridian_chart.gif" alt="meridian chart" loading="lazy">
-      <figcaption><span class="tag">chart</span>The same on the <span class="eq">(x,θ)</span> chart.</figcaption></figure>
     <figure class="wide"><img src="meridian_diag.png" alt="meridian diagnostic" loading="lazy">
       <figcaption>Physical width tracks the Jacobi field <span class="eq">J(x)=A(x)</span>: the <b>necks focus</b>,
         the <b>belly defocuses</b> — as on a sphere, where meridians converge at the poles.</figcaption></figure>
@@ -237,11 +304,6 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
       <figcaption><span class="tag">q=20</span>The beam surfs the crescent loop, through the neck and over the belly.</figcaption></figure>
     <figure><img src="semiclassical_breathing.png" alt="breathing" loading="lazy">
       <figcaption>Transverse width tracks <span class="eq">A(beam)</span> — compress at necks, expand over belly.</figcaption></figure>
-    <figure><img src="nls_semiclassical_hires_torus.gif" alt="hires surf" loading="lazy">
-      <figcaption><span class="tag">q=40 · 300²</span>A crisper, more ray-like beam.</figcaption></figure>
-    <figure><img src="semiclassical_hires_breathing.png" alt="hires breathing" loading="lazy">
-      <figcaption>Breathing locked to the geometry, with a <b>focal brightening at the first neck</b>
-        (peak 1.0→1.22). Mass &amp; energy to ~10⁻¹⁵.</figcaption></figure>
   </div>
 </section>
 
@@ -250,8 +312,6 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
   <p class="sub">On the stable equator a θ-symmetric ring reduces to 1-D — subcritical, so focusing can
     self-trap it into a soliton (the meridian, lacking a transverse trap, only disperses or collapses).</p>
   <div class="grid">
-    <figure><img src="nls_selftrap_linear_torus.gif" alt="linear ring" loading="lazy">
-      <figcaption><b>Linear</b> whispering-gallery ring — breathes in the well.</figcaption></figure>
     <figure><img src="nls_selftrap_focusing_torus.gif" alt="focusing ring" loading="lazy">
       <figcaption><b>Focusing</b> self-traps it tighter and brighter.</figcaption></figure>
     <figure class="wide"><img src="selftrap_comparison.png" alt="selftrap comparison" loading="lazy">
@@ -277,8 +337,6 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
     <figure><img src="nls_defocusing_torus.gif" alt="defocusing" loading="lazy">
       <figcaption><span class="tag">defocusing</span>Repulsive <span class="eq">σ=+1</span>: a hump expands and
         depletes its core — dispersive-shock / rarefaction dynamics, the opposite of self-trapping.</figcaption></figure>
-    <figure><img src="nls_defocusing_chart.gif" alt="defocusing chart" loading="lazy">
-      <figcaption><span class="tag">chart</span>The same on the <span class="eq">(x,θ)</span> chart.</figcaption></figure>
     <figure class="wide"><img src="ring_modulational.png" alt="modulational instability and dark solitons" loading="lazy">
       <figcaption><b>Modulational instability &amp; dark solitons on the belly ring.</b> <b>Left:</b> a focusing
         uniform state is <b>Benjamin–Feir unstable</b> — it breaks into a soliton and recurs
@@ -314,20 +372,43 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
         <span class="eq">V_k=k²/A²</span> a periodic potential → whispering-gallery <b>Bloch bands</b> with
         gaps; random lumps → <b>Anderson-localized</b> modes. No external potential — the geometry is the
         lattice (and the disorder).</figcaption></figure>
+    <figure class="wide"><img src="topological.png" alt="topological whispering-gallery edge modes" loading="lazy">
+      <figcaption><b>A chiral lump twist makes topological edge channels.</b> Twist the lumps helically,
+        <span class="eq">A(x−cθ)</span>: the WG on-site energy <span class="eq">k²/A²(x−cθ)</span> becomes the
+        Harper term <span class="eq">2λcos(2παn+k_θ)</span>, so the twisted-lump strip <b>is</b> the
+        Hofstadter model. <b>Chiral edge modes</b> traverse every gap (left, colored by which edge they hug),
+        carried by gap states pinned to opposite edges (right) — a purely geometric route to topological
+        photonics, whose time analogue is a Floquet drive.</figcaption></figure>
     <figure class="wide"><img src="soliton_barrier.png" alt="soliton trapping vs escape" loading="lazy">
       <figcaption><b>A soliton in the geometric well.</b> A small kick leaves a bright soliton librating in
         the belly; a larger one sends it circulating over the necks — the nonlinear echo of the geodesic
         island/separatrix (§02).</figcaption></figure>
     <figure class="wide"><img src="faraday.png" alt="Faraday parametric amplification" loading="lazy">
-      <figcaption><b>A breathing torus amplifies.</b> Periodically modulating the geometry parametrically
-        pumps a Bogoliubov mode out of noise (Faraday waves, driven at <span class="eq">Ω=2ω_n</span>). Run
-        as a monotonic expansion instead, this is the NLS analogue of cosmological particle production.</figcaption></figure>
+      <figcaption><b>A breathing torus amplifies (periodic drive).</b> Periodically modulating the geometry
+        parametrically pumps a Bogoliubov mode out of noise (Faraday waves, driven at
+        <span class="eq">Ω=2ω_n</span>). Run as a monotonic expansion instead → the next panel.</figcaption></figure>
+    <figure class="wide"><img src="expanding_torus.png" alt="expanding torus cosmological particle production" loading="lazy">
+      <figcaption><b>Prototype — the expanding torus makes particles from the vacuum (monotonic ramp).</b>
+        Ramp the scale factor <span class="eq">a(t)</span> and every belly phonon redshifts
+        <span class="eq">ω_k=ck/a(t)</span> (<b>left</b>) until the adiabatic vacuum can no longer follow, so
+        the quench pumps phonon <b>pairs</b> out of nothing: a scale-invariant plateau
+        <span class="eq">|β_k|²→(a_f−a_i)²/4a_ia_f</span> (the inflationary analogue) whose density structure
+        factor rings with <b>Sakharov oscillations</b> (<b>right</b>) — the acoustic analogue of the CMB peaks.
+        Exact linear Bogoliubov theory, two-mode-squeeze Wronskian held to <span class="eq">10⁻¹³</span>; the
+        NLS realisation of Viermann et al.'s expanding-universe BEC (<i>Nature</i>, 2022).</figcaption></figure>
     <figure class="wide"><img src="dispersion_design.png" alt="geometric dispersion engineering" loading="lazy">
       <figcaption><b>Prototype — geometric dispersion engineering.</b> The WG spectrum
         <span class="eq">ω_m = E_0(m)</span> <i>is</i> the resonator's modal dispersion, so the lump profile is
         a design knob. Inverse-designing <span class="eq">A(x)</span> (a few harmonics) flattens the integrated
         dispersion <b>4.4×</b> over a mode band — a broadband, near-equidistant comb grid engineered by
         geometry rather than waveguide cross-section.</figcaption></figure>
+    <figure class="wide"><img src="neural_operator.png" alt="neural operator surrogate on the manifold" loading="lazy">
+      <figcaption><b>Prototype — a neural operator closes the ML-for-PDE loop.</b> A small MLP learns the
+        forward map lump profile <span class="eq">A(x)</span> → modal dispersion
+        <span class="eq">D_int(m)</span> from solver data (<span class="eq">R²=0.998</span>), then stands in for
+        the eigensolver to <b>inverse-design</b> a flat-dispersion resonator ~<b>2000× faster</b> per
+        evaluation — flattening the integrated dispersion from a wide parabola to near-zero. The learned
+        surrogate for the exact geometry→spectrum map the post set out to motivate.</figcaption></figure>
     <figure class="wide"><img src="analog_horizon.png" alt="analog sonic horizon at the neck" loading="lazy">
       <figcaption><b>Prototype — the neck as an analog black hole.</b> A transonic superfluid speeds up through
         the small-<span class="eq">A</span> throat until the flow speed crosses the sound speed: a
@@ -338,11 +419,14 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
       dissipative Kerr soliton — the soliton-microcomb regime, and a microtoroid resonator <i>is</i> a lumpy
       torus. Robust cavity-soliton nucleation needs a detuning-ramp protocol (a clean next step) rather than
       a seeded pulse, so this one is left as an honest scaffold, not a finished figure.</div>
-    <div class="note"><b>Still open (application-grounded).</b> Two of the frontier directions are prototyped
-      above (dispersion engineering, the analog horizon). Still to build: <b>vortices on a curved superfluid
-      shell</b> (Cold-Atom-Lab bubble BECs) and their curvature pinning; a <b>chiral lump twist</b> for
-      topological whispering-gallery bands; and a <b>neural operator</b> on the manifold to close the post's
-      own ML-for-PDE loop.</div>
+    <div class="note"><b>Still open (application-grounded).</b> The frontier directions above are now
+      prototyped — dispersion engineering, the analog horizon, the expanding-universe analogue, the
+      chiral-twist edge modes, and the neural operator. Still genuinely open: <b>vortices on a curved
+      superfluid shell</b> (NASA Cold-Atom-Lab bubble BECs) and their curvature pinning — a first pass
+      (<code>vortices.py</code>) launches a vortex–antivortex pair on the belly, but on this small ring the
+      pair orbits and annihilates faster than curvature can steer it, so the phase-singularity tracker is
+      sound-limited; a clean demonstration needs a larger shell and a single pinned vortex, left as honest
+      future work.</div>
   </div>
 </section>
 
@@ -368,6 +452,13 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
       Babich &amp; Buldyrev, <i>Asymptotic Methods in Short-Wavelength Diffraction Theory</i>.</li>
     <li><b>NLS on compact manifolds</b> — Burq, Gérard &amp; Tzvetkov,
       <a href="https://muse.jhu.edu/article/168342"><i>Amer. J. Math.</i> <b>126</b>, 569 (2004)</a>.</li>
+    <li><b>The pseudodifferential / microlocal framework</b> (the master lens of §02) — M. Taylor,
+      <a href="https://mtaylor.web.unc.edu/wp-content/uploads/sites/16915/2022/05/psidolect.pdf"><i>Lectures on
+      pseudodifferential operators</i></a> (principal symbol, the propagator as an FIO, propagation of
+      singularities along the geodesic/Hamiltonian flow, functional calculus); and the ΨDO calculus built from
+      <i>global Fourier series on the torus</i> — Ruzhansky &amp; Turunen,
+      <a href="https://arxiv.org/abs/0805.2892"><i>Quantization of pseudo-differential operators on the
+      torus</i> (2010)</a> — the rigorous backing for the Fourier lens here.</li>
     <li><b>Self-trapping, necklaces &amp; collapse</b> — Soljačić, Sears &amp; Segev,
       <a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.81.4851"><i>Phys. Rev. Lett.</i> <b>81</b>, 4851 (1998)</a>;
       mass-critical blow-up universality: Merle &amp; Raphaël,
@@ -380,7 +471,13 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
       Gorodetsky, <a href="https://www.science.org/doi/10.1126/science.aan8083"><i>Dissipative Kerr solitons
       in optical microresonators</i>, Science <b>361</b> (2018)</a>; analog gravity: Barceló, Liberati &amp;
       Visser, <a href="https://link.springer.com/article/10.12942/lrr-2011-3"><i>Analogue Gravity</i>,
-      Living Rev. Relativity <b>14</b>, 3 (2011)</a>.</li>
+      Living Rev. Relativity <b>14</b>, 3 (2011)</a>; analog cosmology in a BEC: Viermann et al.,
+      <a href="https://www.nature.com/articles/s41586-022-05313-9"><i>Quantum field simulator for dynamics in
+      curved spacetime</i>, Nature <b>611</b>, 260 (2022)</a>, with the Sakharov-oscillation observation of
+      Hung, Gurarie &amp; Chin, <a href="https://www.science.org/doi/10.1126/science.1237557"><i>Science</i>
+      <b>341</b>, 1213 (2013)</a>; topological bands via Harper–Hofstadter: Hofstadter,
+      <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.14.2239"><i>Phys. Rev. B</i> <b>14</b>,
+      2239 (1976)</a>.</li>
   </ul>
 </section>
 
@@ -389,7 +486,9 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
   (<code>render*.py</code>, <code>curvature_view.py</code>, <code>quasimode_ladder.py</code>,
   <code>geodesic_phase_space.py</code>, <code>bifurcation.py</code>, <code>ring_1d.py</code>,
     <code>threshold_scan.py</code>, <code>spacetime_carpet.py</code>, <code>defocusing.py</code>,
-  <code>hero.py</code>). Every 3-D frame uses the crescent embedding
+  <code>hero.py</code>), and the frontier prototypes (<code>faraday.py</code>,
+  <code>expanding_torus.py</code>, <code>analog_horizon.py</code>, <code>dispersion_design.py</code>,
+  <code>lattice.py</code>, <code>topological.py</code>, <code>neural_operator.py</code>). Every 3-D frame uses the crescent embedding
   (<span class="eq">x</span> → toroidal, <span class="eq">θ</span> → poloidal).
 </footer>
 
