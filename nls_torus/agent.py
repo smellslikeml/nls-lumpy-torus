@@ -22,13 +22,46 @@ from . import experiment as X
 from . import geometry as G
 
 try:
-    from nooa import Agent, strategy
+    from nooa import Agent, strategy, InvariantError
     from nooa.strategies import CodeActStrategy
     from nooa.config import CodeActConfig
     _NOOA_IMPORT_ERROR = None
 except ImportError as _e:                       # nooa needs Python 3.12
     Agent = object; strategy = None; CodeActStrategy = None; CodeActConfig = None
+    InvariantError = Exception
     _NOOA_IMPORT_ERROR = _e
+
+
+def _has_real_content(m):
+    """True iff `m` holds at least one non-empty value (rejects {} and {'x': []} etc.)."""
+    if not isinstance(m, dict) or not m:
+        return False
+    return any(v not in (None, [], {}, (), "") for v in m.values())
+
+
+def _require_verification(agent, result, call):
+    """NOOA postcondition on probe(): reject a result that is empty or self-certifies
+    without real content — routed back for correction. Closes the 'empty verification
+    passes vacuously' hole AND the 'vacuous flag over zero results' hole a live run
+    exposed. (A structural gate can still be gamed; the durable fix is harness-COMPUTED
+    verification — which the registered experiments have and compose() should adopt.)"""
+    ver = getattr(result, "verification", None) or {}
+    met = getattr(result, "metrics", None) or {}
+    flags = [v for v in ver.values() if isinstance(v, bool)]
+    if not flags:
+        raise InvariantError(
+            "ExperimentResult.verification is EMPTY. Populate it with >=1 boolean trust-flag "
+            "you actually computed (mass_conserved from diagnostics.conservation_drift, and "
+            "grid_converged from a two-resolution run), set trustworthy=is_trustworthy(...).")
+    if not _has_real_content(met):
+        raise InvariantError(
+            "metrics is empty or holds only empty values — your run produced NO numbers. "
+            "Check compose()'s return for an 'error' key, fix the code, and re-run so metrics "
+            "and verification reflect actual computed results (do not self-certify on no data).")
+    if getattr(result, "trustworthy", False) and not all(flags):
+        raise InvariantError(
+            "trustworthy=True but a verification flag is False. Set trustworthy=False, or "
+            "refine the run (finer grid / smaller dt / more seeds) until the checks pass.")
 
 DEFAULT_MAX_ITERATIONS = 16
 
@@ -150,7 +183,8 @@ def tool_search_arxiv(query, max_results=5) -> dict:
 def _make_experimenter_class(max_iterations=DEFAULT_MAX_ITERATIONS, **class_kwargs):
     if _NOOA_IMPORT_ERROR is not None:
         raise ImportError(f"nooa is required for the agent (Python 3.12): {_NOOA_IMPORT_ERROR}")
-    probe_strategy = CodeActStrategy(config=CodeActConfig(max_iterations=max_iterations))
+    probe_strategy = CodeActStrategy(config=CodeActConfig(
+        max_iterations=max_iterations, postconditions=[_require_verification]))
 
     class _ManifoldExperimenter(Agent, **class_kwargs):
         """Designs and runs NLS/Gross-Pitaevskii experiments on a lumpy-torus-family
@@ -185,10 +219,37 @@ def _make_experimenter_class(max_iterations=DEFAULT_MAX_ITERATIONS, **class_kwar
             the registered experiments don't express. `code` runs in a subprocess sandbox
             with numpy + the library preloaded (build_surface, ring_grid, wg_chain,
             CNStepper, RingStepper, fields, diagnostics, bogoliubov, geometry) and MUST
-            assign a dict `result` with 'metrics' and a 'verification' block (include a
-            trust check — e.g. diagnostics.conservation_drift). Returns that dict. Prefer
-            run_experiment/sweep/compare when they fit; use compose only for genuinely new
-            setups, and still gate on the verification you compute."""
+            assign a dict `result` with a 'metrics' dict and a NON-EMPTY 'verification'
+            dict of boolean trust-flags. ALWAYS include a conservation check AND, when a
+            yes/no outcome (like "did it collapse?") drives the answer, a grid-refinement
+            check — run at two resolutions and flag whether the outcome agrees; a
+            resolution-dependent outcome is an artifact, not physics.
+
+            Template to copy (collapse of a hump; conservation + grid-refinement):
+
+                def run(Nx):
+                    surf = build_surface(Nx, Nx)
+                    step = CNStepper(surf, dt=1e-3)
+                    U = fields.localized_hump(surf, amp=6.0, wx=0.35, wth=0.35)
+                    M, K = surf["Mdiag"], surf["K"]
+                    hm=[diagnostics.mass(U,M)]; he=[diagnostics.energy(U,K,M,-1.0)]
+                    pk=diagnostics.peak(U); tc=None
+                    for i in range(1, 1500):
+                        U = step.step(U, sigma3=-1.0); pk=max(pk, diagnostics.peak(U))
+                        hm.append(diagnostics.mass(U,M)); he.append(diagnostics.energy(U,K,M,-1.0))
+                        if pk > 150: tc = i*1e-3; break
+                    return dict(collapsed=tc is not None, t_c=tc, peak=pk,
+                                cons=diagnostics.conservation_drift(hm, he))
+                lo, hi = run(64), run(96)      # two resolutions
+                result = {
+                    "metrics": {"collapsed": hi["collapsed"], "t_c": hi["t_c"], "peak_max": hi["peak"]},
+                    "verification": {"mass_conserved": hi["cons"]["mass_conserved"],
+                                     "energy_conserved": hi["cons"]["energy_conserved"],
+                                     "grid_converged": lo["collapsed"] == hi["collapsed"]},
+                }
+
+            Prefer run_experiment/sweep/compare when they fit; use compose only for
+            genuinely new setups, and gate on the verification you compute."""
             return tool_compose(code, timeout)
 
         def search_arxiv(self, query: str, max_results: int = 5) -> dict:
