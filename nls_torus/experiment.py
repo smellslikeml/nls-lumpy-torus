@@ -117,12 +117,13 @@ def rogue_ring(a0=1.0, g=8.0, q_seed=1, Nth=256, dt=2e-4, T=5.0):
 
 
 @register
-def solver_bench(amp=8.0, sigma5=0.0, Nx=64, Nth=64, dt=1e-3, nsteps=12, pmax=40):
-    """Newton vs Picard for the implicit nonlinear solve on a concentrating hump.
-    Reports iterations/step for each and their step agreement (both solve the same
-    equation -> a converged step is method-independent). Newton wins near strong
-    concentration, where Picard's linear convergence slows or stalls."""
-    surf = build_surface(Nx, Nth)
+def solver_bench(amp=8.0, sigma5=0.0, Nx=64, Nth=64, dt=1e-3, nsteps=12, pmax=40,
+                 geometry="lumpy_torus"):
+    """Newton vs Picard for the implicit nonlinear solve on a concentrating hump (any
+    registered geometry). Reports iterations/step for each and their step agreement (both
+    solve the same equation -> a converged step is method-independent). Newton wins near
+    strong concentration, where Picard's linear convergence slows or stalls."""
+    surf = build_surface(Nx, Nth, geometry=geometry)
     step = CNStepper(surf, dt, sigma5=sigma5, tol=1e-11, pmax=pmax)
     U0 = fields.localized_hump(surf, amp=amp)
     Wp = step.step(U0, -1.0, method="picard")
@@ -253,12 +254,13 @@ def geodesic_stability(k=6, amp=0.9, wx=0.25, Nx=80, Nth=160, dt=2e-3, T=3.0,
 
 
 @register
-def quasimodes(k=8, Nx=400, eps=1.0):
-    """Whispering-gallery quasimodes: bound states of the centrifugal well V_k=k^2/A^2
-    (count below the neck barrier; ground width ~ k^{-1/2})."""
-    from .geometry import profile_A
-    x = np.linspace(-np.pi / 2, np.pi / 2, Nx, endpoint=False); dx = np.pi / Nx
-    A = profile_A(x, eps); V = k ** 2 / A ** 2
+def quasimodes(k=8, Nx=400, eps=1.0, geometry="lumpy_torus"):
+    """Whispering-gallery quasimodes: bound states of the centrifugal well V_k=k^2/A^2 on
+    any registered geometry (count below the neck barrier; ground width ~ k^{-1/2})."""
+    from .geometry import make_geometry
+    geo = make_geometry(geometry, eps=eps)
+    x = np.linspace(geo.x0, geo.x0 + geo.Lx, Nx, endpoint=False); dx = geo.Lx / Nx
+    A = np.asarray(geo.A_of(x), float); V = k ** 2 / A ** 2
     H = np.diag(2.0 / dx ** 2 + V) + np.diag(-1.0 / dx ** 2 * np.ones(Nx - 1), 1) \
         + np.diag(-1.0 / dx ** 2 * np.ones(Nx - 1), -1)
     H[0, -1] = H[-1, 0] = -1.0 / dx ** 2
@@ -372,10 +374,10 @@ def floquet_bands(th1_over_pi=0.5, Ncell=20):
 
 
 @register
-def quantum_chaos(lam_weak=2.5, lam_strong=120.0, Nx=48, Nth=48):
+def quantum_chaos(lam_weak=2.5, lam_strong=120.0, Nx=48, Nth=48, geometry="lumpy_torus"):
     """Theta-lump drives level-spacing statistics from clustering to Wigner-GOE
-    repulsion (P(s<0.3): Poisson~0.26, GOE~0.07)."""
-    surf = build_surface(Nx, Nth); K = surf["K"].toarray(); M = surf["Mdiag"]
+    repulsion (P(s<0.3): Poisson~0.26, GOE~0.07). Runs on any registered geometry."""
+    surf = build_surface(Nx, Nth, geometry=geometry); K = surf["K"].toarray(); M = surf["Mdiag"]
     x, th = surf["x"], surf["th"]; X, TH = np.meshgrid(x, th, indexing="ij")
     V = (np.cos(2 * X - 3 * TH) + 0.6 * np.cos(X + 2 * TH + 0.5)
          + 0.4 * np.sin(3 * X - TH + 0.9)).ravel()

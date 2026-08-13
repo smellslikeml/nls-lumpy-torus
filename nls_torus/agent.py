@@ -81,6 +81,72 @@ def tool_compare(name, configs, metric=None) -> dict:
     return X.compare(name, configs, metric=metric)
 
 
+def tool_compose(code, timeout=120.0) -> dict:
+    """Run a short, NEW experiment written against the nls_torus library, for questions
+    no registered experiment expresses. Executes `code` in a SUBPROCESS sandbox (crash-
+    and time-isolated) with numpy + the library preloaded; the code must assign a dict
+    `result` (ideally with 'metrics' and 'verification'). Returns that dict, or {'error'}.
+
+    Trust boundary: this runs agent-authored physics code — deploy the agent itself in a
+    sandboxed environment; the subprocess adds isolation and a hard time limit, not a
+    security boundary against hostile code."""
+    import os
+    import subprocess
+    import sys
+    import json
+    import textwrap
+    repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    harness = (
+        "import json\n"
+        "import numpy as np\n"
+        "import nls_torus as nt\n"
+        "from nls_torus import build_surface, ring_grid, wg_chain, CNStepper, RingStepper\n"
+        "from nls_torus import fields, diagnostics, bogoliubov, geometry\n"
+        "result = {}\n"
+        + textwrap.dedent(code) + "\n"
+        "print('__RESULT__' + json.dumps(nt.experiment._clean(result)))\n"
+    )
+    env = dict(os.environ)
+    env["PYTHONPATH"] = repo + os.pathsep + env.get("PYTHONPATH", "")
+    try:
+        p = subprocess.run([sys.executable, "-c", harness], capture_output=True,
+                           text=True, timeout=timeout, env=env, cwd=repo)
+    except subprocess.TimeoutExpired:
+        return {"error": f"timeout after {timeout}s"}
+    for line in p.stdout.splitlines():
+        if line.startswith("__RESULT__"):
+            try:
+                return json.loads(line[len("__RESULT__"):])
+            except Exception as e:
+                return {"error": f"result was not JSON-serialisable: {e}"}
+    return {"error": (p.stderr or "code did not assign a `result` dict")[-2000:]}
+
+
+def tool_search_arxiv(query, max_results=5) -> dict:
+    """Search arXiv (title/abstract/authors) to cross-check a numerical finding against
+    the literature or locate the relevant paper. Deterministic, no API key."""
+    import urllib.parse
+    import urllib.request
+    import xml.etree.ElementTree as ET
+    url = "http://export.arxiv.org/api/query?" + urllib.parse.urlencode(
+        {"search_query": f"all:{query}", "start": 0, "max_results": max_results})
+    try:
+        with urllib.request.urlopen(url, timeout=20) as resp:
+            data = resp.read()
+    except Exception as e:
+        return {"error": str(e), "query": query}
+    ns = {"a": "http://www.w3.org/2005/Atom"}
+    out = []
+    for e in ET.fromstring(data).findall("a:entry", ns):
+        aid = e.findtext("a:id", "", ns)
+        out.append({"id": aid.rsplit("/", 1)[-1],
+                    "title": " ".join(e.findtext("a:title", "", ns).split()),
+                    "authors": [a.findtext("a:name", "", ns) for a in e.findall("a:author", ns)][:6],
+                    "summary": " ".join(e.findtext("a:summary", "", ns).split())[:300],
+                    "url": aid})
+    return {"query": query, "results": out}
+
+
 def _make_experimenter_class(max_iterations=DEFAULT_MAX_ITERATIONS, **class_kwargs):
     if _NOOA_IMPORT_ERROR is not None:
         raise ImportError(f"nooa is required for the agent (Python 3.12): {_NOOA_IMPORT_ERROR}")
@@ -114,6 +180,25 @@ def _make_experimenter_class(max_iterations=DEFAULT_MAX_ITERATIONS, **class_kwar
             """Run labelled configs of one experiment side by side."""
             return tool_compare(name, configs, metric)
 
+        def compose(self, code: str, timeout: float = 120.0) -> dict:
+            """Run a NEW experiment you write against the nls_torus library, for questions
+            the registered experiments don't express. `code` runs in a subprocess sandbox
+            with numpy + the library preloaded (build_surface, ring_grid, wg_chain,
+            CNStepper, RingStepper, fields, diagnostics, bogoliubov, geometry) and MUST
+            assign a dict `result` with 'metrics' and a 'verification' block (include a
+            trust check — e.g. diagnostics.conservation_drift). Returns that dict. Prefer
+            run_experiment/sweep/compare when they fit; use compose only for genuinely new
+            setups, and still gate on the verification you compute."""
+            return tool_compose(code, timeout)
+
+        def search_arxiv(self, query: str, max_results: int = 5) -> dict:
+            """Search arXiv (title/abstract/authors) to check a numerical finding against
+            the literature or find the relevant paper — e.g. the Townes critical mass, a
+            Kibble-Zurek exponent, the analog-Hawking temperature. Returns {id, title,
+            authors, summary, url} per hit. No API key. Use it to sanity-check an expected
+            value, but the RUN is the evidence — cite the number you computed."""
+            return tool_search_arxiv(query, max_results)
+
         def is_trustworthy(self, verification: dict) -> bool:
             """True iff every boolean trust-flag in a verification block is True. Call this
             before believing ANY result; if False, refine the run rather than trusting it."""
@@ -124,13 +209,15 @@ def _make_experimenter_class(max_iterations=DEFAULT_MAX_ITERATIONS, **class_kwar
         async def probe(self, question: str) -> ExperimentResult:
             """Answer a physics question by DESIGNING and RUNNING a numerical experiment.
 
-            Compose the tools above — or, for a genuinely new experiment, the nls_torus
-            primitives (build_surface, CNStepper/RingStepper, fields, diagnostics,
-            bogoliubov) — into the smallest run that decides the question. ALWAYS read the
+            Use run_experiment/sweep/compare when a registered experiment fits; for a
+            genuinely NEW setup, write it against the library and run it via compose(code).
+            Pick the smallest run that decides the question. ALWAYS read the
             returned verification block and call is_trustworthy(...) before concluding; if
             it fails, refine (finer grid / smaller dt / more seeds), do not trust the
-            number. Return an ExperimentResult whose trustworthy = is_trustworthy(the
-            verification you relied on). Never assert physics you did not compute here."""
+            number. You may search_arxiv(...) to check an expected value or universality
+            class against the literature — but the RUN is the evidence. Return an
+            ExperimentResult whose trustworthy = is_trustworthy(the verification you relied
+            on). Never assert physics you did not compute here."""
             ...
     return _ManifoldExperimenter
 
