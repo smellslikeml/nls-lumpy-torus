@@ -239,9 +239,10 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
       sound at the neck, a geometry-made black hole.</p>
     <p>Static geometry bends <i>where</i> modes go; dynamic geometry decides <i>which</i> modes exist — the
       metric becomes a source that mixes the vacuum, and it can act back on the nonlinearity itself: breathing
-      the belly resonantly <b>delays or hastens</b> the focusing collapse (§10), the control-knob face of this
-      axis. (Add a spatial twist to the time-drive and you reach the <b>Floquet-topological</b> route to the
-      edge channels in §10.)</p>
+      the belly resonantly <b>delays or hastens</b> the fast necklace collapse and fully <b>arrests</b> the slow
+      single-hump one into a stable breather (§10), the control-knob face of this axis. And a spatial twist is
+      not even needed for topology — a two-step <b>time</b>-drive alone makes <b>Floquet edge modes</b> at
+      quasienergy 0 and π (§10).</p>
   </div>
 
   <div class="grid">
@@ -401,7 +402,15 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
         Harper term <span class="eq">2λcos(2παn+k_θ)</span>, so the twisted-lump strip <b>is</b> the
         Hofstadter model. <b>Chiral edge modes</b> traverse every gap (left, colored by which edge they hug),
         carried by gap states pinned to opposite edges (right) — a purely geometric route to topological
-        photonics, whose time analogue is a Floquet drive.</figcaption></figure>
+        photonics, whose time analogue is the Floquet drive in the next panel.</figcaption></figure>
+    <figure class="wide"><img src="floquet.png" alt="Floquet-topological edge modes from periodic driving" loading="lazy">
+      <figcaption><b>Floquet engineering — a <i>time</i> route to the edge modes.</b> Breathe the lump chain
+        periodically instead of twisting it in space: a two-step hopping cycle (intra-lump bonds on, then
+        inter-lump) makes the one-period evolution operator carry <b>quasienergy bands</b> whose gaps host
+        chiral edge modes — at quasienergy <span class="eq">ε=0</span> (a static-like mode) <b>and</b> at
+        <span class="eq">ε=π</span>, an <b>anomalous mode with no static analogue</b> (left), the two living on
+        opposite edges (right). The time-domain sibling of the chiral-twist bands above: drive, don't twist.
+        Real-world: Floquet photonics and periodically-driven cold atoms.</figcaption></figure>
     <figure class="wide"><img src="soliton_barrier.png" alt="soliton trapping vs escape" loading="lazy">
       <figcaption><b>A soliton in the geometric well.</b> A small kick leaves a bright soliton librating in
         the belly; a larger one sends it circulating over the necks — the nonlinear echo of the geodesic
@@ -428,9 +437,24 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
         (<span class="eq">Ω=16</span>) and the drive parametrically feeds the very sidebands that fragment the
         ring, so it gives no help or even <b>hastens</b> collapse (<b>right</b>). A geometric Kapitza /
         Feshbach-management effect (Saito–Ueda) — the same idea, <b>dynamic stabilization of a wave
-        instability</b>, that plasma actuators use, and reduced-model kin to Langmuir-wave collapse. Full
-        <i>arrest</i> of the azimuthal collapse would need a faster drive or a different observable — an honest
-        open edge.</figcaption></figure>
+        instability</b>, that plasma actuators use, and reduced-model kin to Langmuir-wave collapse. It only
+        <i>delays</i> this fast azimuthal collapse; the next panel shows the collapse it fully
+        <i>arrests</i>.</figcaption></figure>
+    <figure class="wide"><img src="collapse_arrest.png" alt="arresting the Townes collapse by fast breathing" loading="lazy">
+      <figcaption><b>Prototype — <i>arresting</i> the collapse (the management the necklace resisted).</b> Where
+        the blow-up is a <b>single localized hump</b> just above the mass-critical (Townes) threshold, the same
+        knob works cleanly. Bare, it self-focuses and blows up (<span class="eq">t_c≈0.11</span>, <b>left,
+        pink</b>); breathing the belly fast and hard (<span class="eq">δ=0.8, Ω=100</span>) turns it into a
+        <b>stable breather</b> whose peak settles to a bounded level (<b>blue</b>) and survives indefinitely — a
+        genuine <b>arrest</b>, above a depth threshold (<b>middle</b>) and a frequency threshold (<b>right</b>;
+        too slow a drive instead hastens it). Nonlinearity management (Saito–Ueda); here the belly's curvature
+        and trap supply what pure 2-D cubic management lacks. The contrast with the necklace <i>is</i> the
+        physics: a drive averages away a <b>slow radial</b> collapse but only delays a <b>fast azimuthal</b>
+        one.</figcaption></figure>
+    <figure class="wide"><img src="nls_collapse_arrest.gif" alt="animation: collapse vs arrested breather" loading="lazy">
+      <figcaption><span class="tag">animation</span><b>Left:</b> the bare hump self-focuses and collapses
+        (frozen once it blows up). <b>Right:</b> the same hump under fast belly-breathing survives as a pulsing
+        soliton — the blow-up dynamically arrested, side by side.</figcaption></figure>
     <figure class="wide"><img src="dispersion_design.png" alt="geometric dispersion engineering" loading="lazy">
       <figcaption><b>Prototype — geometric dispersion engineering.</b> The WG spectrum
         <span class="eq">ω_m = E_0(m)</span> <i>is</i> the resonator's modal dispersion, so the lump profile is
@@ -512,7 +536,11 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
       Hung, Gurarie &amp; Chin, <a href="https://www.science.org/doi/10.1126/science.1237557"><i>Science</i>
       <b>341</b>, 1213 (2013)</a>; topological bands via Harper–Hofstadter: Hofstadter,
       <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.14.2239"><i>Phys. Rev. B</i> <b>14</b>,
-      2239 (1976)</a>.</li>
+      2239 (1976)</a>; anomalous Floquet edge modes: Rudner, Lindner, Berg &amp; Levin,
+      <a href="https://journals.aps.org/prx/abstract/10.1103/PhysRevX.3.031005"><i>Phys. Rev. X</i> <b>3</b>,
+      031005 (2013)</a>; dynamical (Feshbach-resonance) management of collapse: Saito &amp; Ueda,
+      <a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.90.040403"><i>Phys. Rev. Lett.</i>
+      <b>90</b>, 040403 (2003)</a>.</li>
   </ul>
 </section>
 
@@ -524,7 +552,7 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
   <code>hero.py</code>), and the frontier prototypes (<code>faraday.py</code>,
   <code>expanding_torus.py</code>, <code>analog_horizon.py</code>, <code>dispersion_design.py</code>,
   <code>lattice.py</code>, <code>topological.py</code>, <code>neural_operator.py</code>,
-  <code>dynamical_stabilization.py</code>). Every 3-D frame uses the crescent embedding
+  <code>dynamical_stabilization.py</code>, <code>collapse_arrest.py</code>, <code>floquet.py</code>). Every 3-D frame uses the crescent embedding
   (<span class="eq">x</span> → toroidal, <span class="eq">θ</span> → poloidal).
 </footer>
 
