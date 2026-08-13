@@ -195,6 +195,21 @@ pinched at the neck (one bulge + one waist). It's non-isometric in shape (true
 closure is the open barrel) but preserves the one-elliptic/one-hyperbolic
 geometry. All `*_torus.gif` render on it.
 
+## Toolkit — modular library + agent tool
+
+The gallery scripts are refactored into a reusable package **`nls_torus/`** (geometry /
+operators / one pluggable-nonlinearity stepper / fields / diagnostics+verification /
+Bogoliubov / declarative experiments) and a self-describing tool
+**`experiment_tool.py`** (`run_experiment`) that returns `{metrics, verification,
+provenance}` as JSON — a substrate for **numerically-grounded inference**: run an
+experiment, reason over the numbers and the trust signals, not priors. See
+[`docs/toolkit.md`](docs/toolkit.md).
+
+```
+python3 experiment_tool.py --list
+python3 experiment_tool.py run collapse '{"amp":6,"sigma5":0.4}'
+```
+
 ## Possible next steps
 
 - True **Newton** for the nonlinearity (real-split `δū` Jacobian) — faster than
