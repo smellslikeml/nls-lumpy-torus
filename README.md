@@ -210,6 +210,10 @@ python3 experiment_tool.py --list
 python3 experiment_tool.py run collapse '{"amp":6,"sigma5":0.4}'
 ```
 
+It's also an **MCP server** (`mcp_server.py`) with `run_experiment` / `sweep` /
+`compare` verbs — `claude mcp add nls-torus -- python3 mcp_server.py`. A `sweep` returns
+a scaling fit in one call (e.g. Kibble–Zurek `k* ~ τ_Q^{-0.22}`, all points verified).
+
 ## Possible next steps
 
 - True **Newton** for the nonlinearity (real-split `δū` Jacobian) — faster than

@@ -61,6 +61,35 @@ A result:
                    "note": "reduced mean-field model; results need validation vs full physics"} }
 ```
 
+## MCP server — native agent tools (`mcp_server.py`)
+
+The same toolkit is exposed over the Model Context Protocol, so Claude Code calls it as
+**native tools** (no shelling out). Register once:
+
+```
+claude mcp add nls-torus -- python3 /path/to/mcp_server.py
+```
+
+Verbs:
+
+| tool | what it does |
+|---|---|
+| `list_experiments()` | capabilities — names, params, defaults |
+| `run_experiment(name, params)` | one run → `{metrics, verification, provenance, summary}` |
+| `sweep(name, param, values, base_params, metric)` | scan one parameter; returns per-value metric + verification **and a log-log scaling fit** |
+| `compare(name, configs, metric)` | run labelled configs side by side; reports which extremises the metric |
+
+`sweep` turns a scaling question into one call. Example — Kibble–Zurek:
+
+```
+sweep("kz_freeze", "tau_Q", [0.1, 0.4, 1.6, 6.4], metric="kstar_mean")
+  → k* = 5.65, 4.28, 3.02, 2.30 ;  scaling: kstar_mean ~ tau_Q^(-0.219) ;  all_verified: true
+```
+
+— the tool recovers the KZ exponent and confirms every point passed its trust checks.
+`compare` does the three collapse regimes at once (bare collapses, cubic-quintic
+arrests, managed hastens), each tagged with its verification flag.
+
 ## Numerically-grounded inference
 
 The loop this project ran by hand — *pose a phenomenon → map to control knobs → run →

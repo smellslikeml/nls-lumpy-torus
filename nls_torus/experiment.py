@@ -134,6 +134,35 @@ def _clean(obj):
     return obj
 
 
+@register
+def kz_freeze(tau_Q=0.4, g_f=40.0, a0=1.0, radius=10.0, Nth=1024, dt=2e-4,
+              nseed=5, sat=1.35):
+    """One Kibble-Zurek quench point: ramp the ring coupling 0->g_f over tau_Q and
+    read the frozen wavenumber k* (band-limited to the MI band, seed-averaged). Sweep
+    tau_Q to get the KZ power law k* ~ tau_Q^{-b}."""
+    ring = ring_grid(Nth, radius=radius)
+    step = RingStepper(ring, dt)
+    qband = 1.3 * np.sqrt(g_f)
+    ks = []
+    for s in range(nseed):
+        u = fields.uniform_noise(ring, a0=a0, noise=3e-3, seed=s)
+        n = int((tau_Q + 8.0) / dt)
+        for i in range(n):
+            g = g_f * min(i * dt / tau_Q, 1.0)
+            u = step.step(u, g)
+            if np.max(np.abs(u)) > sat * a0:
+                ks.append(diag.ring_dominant_wavenumber(u, ring, band=qband))
+                break
+    ks = np.array([k for k in ks if np.isfinite(k) and k > 0])
+    kbar = float(ks.mean()) if len(ks) else float("nan")
+    metrics = {"tau_Q": tau_Q, "kstar_mean": kbar,
+               "kstar_std": float(ks.std()) if len(ks) else float("nan")}
+    ver = {"n_seeds": int(len(ks)), "seeds_ok": len(ks) >= max(3, nseed - 1),
+           "kstar_in_band": bool(0 < kbar <= qband)}
+    return dict(metrics=metrics, verification=ver, series={},
+                summary=f"tau_Q={tau_Q}: k*={kbar:.2f} (band-limited, {len(ks)} seeds)")
+
+
 def run(name, **params):
     if name not in REGISTRY:
         raise KeyError(f"unknown experiment '{name}'. Available: {sorted(REGISTRY)}")
