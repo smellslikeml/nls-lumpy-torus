@@ -215,9 +215,15 @@ def _make_experimenter_class(max_iterations=DEFAULT_MAX_ITERATIONS, **class_kwar
             returned verification block and call is_trustworthy(...) before concluding; if
             it fails, refine (finer grid / smaller dt / more seeds), do not trust the
             number. You may search_arxiv(...) to check an expected value or universality
-            class against the literature — but the RUN is the evidence. Return an
-            ExperimentResult whose trustworthy = is_trustworthy(the verification you relied
-            on). Never assert physics you did not compute here."""
+            class against the literature — but the RUN is the evidence.
+
+            The returned ExperimentResult MUST populate `metrics` (the numbers you
+            computed) and `verification` (the trust flags — ALWAYS include a check such as
+            diagnostics.conservation_drift / a Wronskian / a grid-refinement comparison; an
+            EMPTY verification is treated as UNVERIFIED and is not trustworthy). Set
+            trustworthy = is_trustworthy(result.verification). If you cannot verify a
+            claim (e.g. a narrow packet may just be under-resolved), say so and set
+            trustworthy=False. Never assert physics you did not compute and verify here."""
             ...
     return _ManifoldExperimenter
 

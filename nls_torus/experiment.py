@@ -451,9 +451,11 @@ def run(name, **params):
 
 
 def verified(ver):
-    """A result is 'verified' iff every boolean trust-flag it reports is True."""
+    """A result is 'verified' iff it reports at least one boolean trust-flag and every
+    one is True. Absence of verification is NOT verified (an empty block must not pass
+    vacuously — a live agent run exposed exactly that hole)."""
     flags = [v for v in ver.values() if isinstance(v, bool)]
-    return all(flags) if flags else True
+    return bool(flags) and all(flags)
 
 
 def sweep(name, param, values, base_params=None, metric=None):
