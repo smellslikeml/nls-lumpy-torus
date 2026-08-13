@@ -203,9 +203,13 @@ fields / diagnostics+verification / Bogoliubov / declarative experiments) and a
 self-describing tool **`experiment_tool.py`** (`run_experiment`) that returns `{metrics,
 verification, provenance}` as JSON — a substrate for **numerically-grounded inference**:
 run an experiment, reason over the numbers and the trust signals, not priors. See
-[`docs/toolkit.md`](docs/toolkit.md). Experiments: `collapse` (bare / managed /
-cubic-quintic), `expanding_cosmos`, `rogue_ring`, `kz_freeze`, `solver_bench`
-(Newton vs Picard), `thouless_pump`.
+[`docs/toolkit.md`](docs/toolkit.md). The **whole gallery is wired into the registry** —
+16 experiments spanning `conservation`, `geodesic_stability`, `quasimodes`, `revival`,
+`bifurcation`, `collapse` (bare / managed / cubic-quintic), `rogue_ring`, `faraday`,
+`expanding_cosmos`, `analog_horizon`, `kz_freeze`, `topological_bands`, `floquet_bands`,
+`quantum_chaos`, `thouless_pump`, and `solver_bench` (Newton vs Picard) — each returning
+metrics + verification, all drivable through the MCP `run_experiment` / `sweep` /
+`compare` verbs.
 
 ```
 python3 experiment_tool.py --list

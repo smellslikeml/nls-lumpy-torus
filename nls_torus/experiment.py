@@ -177,6 +177,218 @@ def thouless_pump(J=1.0, delta=0.7, mass=0.9, Nk=400):
     return dict(metrics=metrics, verification=ver, series={}, summary=summary)
 
 
+@register
+def conservation(eps=1.0, Nx=64, Nth=128, dt=2e-3, T=1.0, sigma3=1.0):
+    """Solver validation: mass and energy drift of a wavepacket over a run."""
+    surf = build_surface(Nx, Nth, eps=eps); step = CNStepper(surf, dt)
+    U = fields.localized_hump(surf, amp=1.0, k=4)
+    M, K = surf["Mdiag"], surf["K"]
+    hm = [diag.mass(U, M)]; he = [diag.energy(U, K, M, sigma3)]
+    for _ in range(int(round(T / dt))):
+        U = step.step(U, sigma3); hm.append(diag.mass(U, M)); he.append(diag.energy(U, K, M, sigma3))
+    c = diag.conservation_drift(hm, he)
+    return dict(metrics={"mass_drift": c["mass_drift"], "energy_drift": c["energy_drift"]},
+                verification={"mass_conserved": c["mass_conserved"], "energy_conserved": c["energy_conserved"]},
+                series={}, summary=f"mass drift {c['mass_drift']:.1e}, energy drift {c['energy_drift']:.1e}")
+
+
+@register
+def bifurcation(eps=1.0):
+    """Elliptic<->hyperbolic geometry bifurcation: belly/neck Gaussian curvatures vs eps
+    (numeric vs the analytic K_belly=eps/(1+eps), K_neck=-eps)."""
+    from .geometry import curvature_K
+    Kb, Kn = float(curvature_K(0.0, eps)), float(curvature_K(np.pi / 2, eps))
+    return dict(metrics={"K_belly": Kb, "K_neck": Kn, "eps": eps},
+                verification={"matches_analytic": abs(Kb - eps / (1 + eps)) < 1e-3 and abs(Kn + eps) < 1e-3},
+                series={}, summary=f"eps={eps}: K_belly={Kb:.3f}, K_neck={Kn:.3f} (belly elliptic iff eps>0)")
+
+
+@register
+def revival(Nth=256, k0=6, wth=0.5):
+    """Talbot quantum revival: a packet released on the belly ring reforms at t=2*pi."""
+    ring = ring_grid(Nth, radius=1.0); th = ring["th"]
+    dth = np.angle(np.exp(1j * (th - np.pi)))
+    u0 = np.exp(-dth ** 2 / (2 * wth ** 2)) * np.exp(1j * k0 * th)
+    n = 6000; dt = 2 * np.pi / n
+    step = RingStepper(ring, dt); u = u0.copy()
+    for _ in range(n):
+        u = step.step(u, 0.0)                     # linear (g=0)
+    fid = abs(np.vdot(u0, u)) / (np.linalg.norm(u0) * np.linalg.norm(u))
+    return dict(metrics={"revival_fidelity": float(fid)},
+                verification={"revives": fid > 0.99}, series={},
+                summary=f"Talbot revival fidelity at t=2pi: {fid:.4f}")
+
+
+@register
+def geodesic_stability(k=6, amp=0.9, wx=0.25, Nx=80, Nth=160, dt=2e-3, T=3.0):
+    """Beam along the elliptic (belly) vs hyperbolic (neck) parallel geodesic: transverse
+    width stays bounded on the stable orbit, grows on the unstable one."""
+    surf = build_surface(Nx, Nth); step = CNStepper(surf, dt)
+    x, A, dx, dth = surf["x"], surf["A"], surf["dx"], surf["dth"]
+    Nx_, Nth_, Lx = surf["Nx"], surf["Nth"], np.pi
+
+    def xwidth(U, xc):
+        f = np.abs(U.reshape(Nx_, Nth_)) ** 2
+        Px = f.sum(1) * A * dx * dth
+        d = (x - xc + Lx / 2) % Lx - Lx / 2
+        return np.sqrt(np.sum(Px * d ** 2) / (Px.sum() + 1e-300))
+
+    res = {}
+    for name, xc in [("elliptic", 0.0), ("hyperbolic", np.pi / 2)]:
+        U = fields.geodesic_ring(surf, xc=xc, amp=amp, wx=wx, k=k)
+        w0 = xwidth(U, xc); wmax = w0
+        for _ in range(int(round(T / dt))):
+            U = step.step(U, -1.0); wmax = max(wmax, xwidth(U, xc))
+        res[name] = wmax / w0
+    # A narrow packet breathes on either orbit; the stable/unstable discriminator is
+    # RELATIVE — the hyperbolic neck spreads the beam more than the elliptic belly
+    # (an absolute bound would mislabel the belly's bounded breathing as instability).
+    return dict(metrics={"elliptic_width_ratio": res["elliptic"], "hyperbolic_width_ratio": res["hyperbolic"],
+                         "spread_ratio": res["hyperbolic"] / res["elliptic"]},
+                verification={"neck_spreads_more": res["hyperbolic"] > 1.3 * res["elliptic"]},
+                series={}, summary=f"transverse spread: belly {res['elliptic']:.2f}x, "
+                                   f"neck {res['hyperbolic']:.2f}x ({res['hyperbolic']/res['elliptic']:.1f}x more at the neck)")
+
+
+@register
+def quasimodes(k=8, Nx=400, eps=1.0):
+    """Whispering-gallery quasimodes: bound states of the centrifugal well V_k=k^2/A^2
+    (count below the neck barrier; ground width ~ k^{-1/2})."""
+    from .geometry import profile_A
+    x = np.linspace(-np.pi / 2, np.pi / 2, Nx, endpoint=False); dx = np.pi / Nx
+    A = profile_A(x, eps); V = k ** 2 / A ** 2
+    H = np.diag(2.0 / dx ** 2 + V) + np.diag(-1.0 / dx ** 2 * np.ones(Nx - 1), 1) \
+        + np.diag(-1.0 / dx ** 2 * np.ones(Nx - 1), -1)
+    H[0, -1] = H[-1, 0] = -1.0 / dx ** 2
+    E, psi = np.linalg.eigh(H)
+    Vneck = k ** 2 / A.min() ** 2
+    nbound = int(np.sum(E < Vneck))
+    p0 = np.abs(psi[:, 0]) ** 2; p0 = p0 / p0.sum()
+    width = float(np.sqrt(np.sum(p0 * x ** 2)))
+    return dict(metrics={"n_bound_states": nbound, "ground_width": width,
+                         "width_times_sqrt_k": width * np.sqrt(k)},
+                verification={"has_bound_states": nbound > 0, "ground_trapped": bool(E[0] < Vneck)},
+                series={}, summary=f"k={k}: {nbound} whispering-gallery bound states, ground width {width:.3f}")
+
+
+@register
+def analog_horizon(mu=1.0, g=1.0, Nx=1200):
+    """Neck as a de Laval nozzle -> sonic horizon; surface gravity kappa and Hawking
+    temperature T_H = kappa/2pi (static fit cross-checked against the ray peeling rate)."""
+    from scipy.integrate import solve_ivp
+    x = np.linspace(-np.pi / 2, np.pi / 2, Nx)
+    A = np.sqrt((1 + np.sin(x) ** 2) / 2); Amin = A.min()
+    vs = np.sqrt(2 * mu / 3); J = vs ** 3 * Amin
+    v = np.empty_like(x)
+    for i, xi in enumerate(x):
+        r = np.roots([0.5, 0, -mu, J / A[i]]); pos = np.sort(r[np.abs(r.imag) < 1e-6].real)
+        pos = pos[pos > 0]; v[i] = pos[0] if xi < 0 else pos[-1]
+    c = np.sqrt(g * J / (v * A)); vmc = v - c
+    m = (np.abs(x) > 0.02) & (np.abs(x) < 0.35)
+    cfit = np.polyfit(x[m], vmc[m], 3); vmc_s = np.poly1d(cfit)
+    kappa = abs(np.polyval(np.polyder(cfit), 0.0)); T_H = kappa / (2 * np.pi)
+    s = solve_ivp(lambda t, y: vmc_s(y), [0, 9], [-0.03], max_step=0.02, rtol=1e-8)
+    tt, xx = s.t, s.y[0]; near = np.abs(xx) < 0.15
+    kdyn = abs(np.polyfit(tt[near], np.log(np.abs(xx[near])), 1)[0])
+    return dict(metrics={"kappa": float(kappa), "T_H": float(T_H), "kappa_dynamical": float(kdyn)},
+                verification={"kappa_dyn_matches_static": abs(kdyn - kappa) / kappa < 0.1},
+                series={}, summary=f"sonic horizon: kappa={kappa:.3f}, T_H={T_H:.3f}")
+
+
+@register
+def faraday(nres=3, delta=0.5, g0=1.0, a=1.0, Nth=512, T=24.0, Nt=12000):
+    """Breathing torus -> parametric (Faraday) amplification: driving the coupling at
+    Omega=2*omega_n grows Bogoliubov mode n out of noise."""
+    th = np.linspace(0, 2 * np.pi, Nth, endpoint=False); q = np.fft.fftfreq(Nth, d=1.0 / Nth)
+    rng = np.random.default_rng(1)
+    Omega = 2 * nres * np.sqrt(nres ** 2 + 2 * g0 * a ** 2)
+    dt = T / Nt; Lh = np.exp(-1j * q ** 2 * dt / 2)
+    u = a * (1 + 0.01 * np.cos(nres * th)) + 1e-4 * (rng.standard_normal(Nth) + 1j * rng.standard_normal(Nth))
+    amp0 = None; ampmax = 0.0
+    for i in range(Nt):
+        gg = g0 * (1 + delta * np.cos(Omega * i * dt))
+        u = np.fft.ifft(Lh * np.fft.fft(u)); u = u * np.exp(-1j * gg * np.abs(u) ** 2 * dt)
+        u = np.fft.ifft(Lh * np.fft.fft(u))
+        uk = np.abs(np.fft.fft(u)[nres]) / Nth
+        amp0 = uk if amp0 is None else amp0; ampmax = max(ampmax, uk)
+    growth = ampmax / (amp0 + 1e-30)
+    return dict(metrics={"mode": nres, "growth_factor": float(growth)},
+                verification={"parametrically_amplified": growth > 10},
+                series={}, summary=f"Faraday mode n={nres} grows {growth:.0f}x at Omega=2*omega_n")
+
+
+@register
+def topological_bands(alpha=1.0 / 3.0, Ncell=40, lam=1.0, t_hop=1.0, Nk=240):
+    """Chiral lump twist -> Hofstadter strip: chiral edge modes crossing the gaps."""
+    n = np.arange(Ncell); center = (Ncell - 1) / 2; kth = np.linspace(0, 2 * np.pi, Nk)
+    max_edge = 0.0
+    for kk in kth:
+        H = np.diag(2 * lam * np.cos(2 * np.pi * alpha * n + kk)) \
+            + np.diag(-t_hop * np.ones(Ncell - 1), 1) + np.diag(-t_hop * np.ones(Ncell - 1), -1)
+        w, V = np.linalg.eigh(H)
+        edge = np.sum(V ** 2 * ((n[:, None] - center) / center), axis=0)
+        gap = (w > -3.2) & (w < -1.6)
+        if gap.any():
+            max_edge = max(max_edge, float(np.max(np.abs(edge[gap]))))
+    return dict(metrics={"flux_alpha": alpha, "max_edge_localization": max_edge},
+                verification={"edge_modes_present": max_edge > 0.5},
+                series={}, summary=f"Hofstadter strip (flux {alpha:.2g}): max gap edge-localization {max_edge:.2f}")
+
+
+@register
+def floquet_bands(th1_over_pi=0.5, Ncell=20):
+    """Two-step-driven lump chain -> Floquet edge modes at quasienergy 0 AND pi (the
+    anomalous pi-mode has no static analogue)."""
+    Ns = 2 * Ncell
+    intra = [(2 * i, 2 * i + 1) for i in range(Ncell)]
+    inter = [(2 * i + 1, 2 * i + 2) for i in range(Ncell - 1)]
+    site = np.arange(Ns); center = (Ns - 1) / 2
+
+    def rot(theta, pairs):
+        Mr = np.eye(Ns, dtype=complex); c, s = np.cos(theta), -1j * np.sin(theta)
+        for a, b in pairs:
+            Mr[a, a] = c; Mr[b, b] = c; Mr[a, b] = s; Mr[b, a] = s
+        return Mr
+
+    th1 = th1_over_pi * np.pi
+    best = (0.0, 0.0)
+    for th2 in np.linspace(0, 2 * np.pi, 120):
+        w, V = np.linalg.eig(rot(th2, inter) @ rot(th1, intra))
+        eps = np.angle(w); edge = np.sum(np.abs(V) ** 2 * ((site[:, None] - center) / center), axis=0)
+
+        def he(target):
+            d = np.abs(np.angle(np.exp(1j * (eps - target))))
+            cand = np.where((d < 0.4) & (np.abs(edge) > 0.5))[0]
+            return float(np.max(np.abs(edge[cand]))) if len(cand) else 0.0
+        z, p = he(0.0), he(np.pi)
+        if z > 0.5 and p > 0.5 and z + p > best[0] + best[1]:
+            best = (z, p)
+    z, p = best
+    return dict(metrics={"zero_mode_edge": z, "pi_mode_edge": p},
+                verification={"anomalous_pi_mode": p > 0.5, "zero_mode": z > 0.5},
+                series={}, summary=f"Floquet edge modes: 0-mode {z:.2f}, pi-mode {p:.2f} (anomalous)")
+
+
+@register
+def quantum_chaos(lam_weak=2.5, lam_strong=120.0, Nx=48, Nth=48):
+    """Theta-lump drives level-spacing statistics from clustering to Wigner-GOE
+    repulsion (P(s<0.3): Poisson~0.26, GOE~0.07)."""
+    surf = build_surface(Nx, Nth); K = surf["K"].toarray(); M = surf["Mdiag"]
+    x, th = surf["x"], surf["th"]; X, TH = np.meshgrid(x, th, indexing="ij")
+    V = (np.cos(2 * X - 3 * TH) + 0.6 * np.cos(X + 2 * TH + 0.5)
+         + 0.4 * np.sin(3 * X - TH + 0.9)).ravel()
+    D = 1.0 / np.sqrt(M); DKD = (D[:, None] * K) * D[None, :]
+
+    def rep(lam):
+        E = np.linalg.eigvalsh(DKD + np.diag(lam * V))
+        s = diag.level_spacings(E)
+        return float(np.mean(s < 0.3))
+    rw, rs = rep(lam_weak), rep(lam_strong)
+    return dict(metrics={"repulsion_weak": rw, "repulsion_strong": rs, "goe_ref": 0.07, "poisson_ref": 0.26},
+                verification={"goe_emerges": rs < 0.15, "clustering_weak": rw > 0.25},
+                series={}, summary=f"P(s<0.3): weak {rw:.2f} (clustered), strong {rs:.2f} (GOE-like)")
+
+
 def _clean(obj):
     """Recursively convert numpy scalars/bools/arrays to native Python so the Result
     is JSON-serialisable (the agent tool speaks JSON)."""
