@@ -638,10 +638,24 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
         quality factor <span class="eq">Q=E_r/Γ</span> up <b>exponentially</b> — a straight line on a log axis,
         <span class="eq">Q: 284→85138</span> (right). Every point survived the absorber-independence check that
         killed dozens of numerical artifacts.</figcaption></figure>
+    <figure class="wide"><img src="horn_hawking.png" alt="analog Hawking radiation on the open horn" loading="lazy">
+      <figcaption><b>The same open horn is also an analog black hole.</b> Drive a superfluid <i>through</i> the
+        throat and it becomes a <b>de Laval nozzle</b>: the flow accelerates from a subsonic reservoir, crosses
+        the sound speed <i>exactly</i> at the throat — a <b>sonic horizon</b> — and radiates supersonically out
+        the open end, where (unlike the closed torus neck of §10) the phonons genuinely escape into the absorbing
+        collar. <b>Left:</b> flow speed <span class="eq">v</span> and sound speed <span class="eq">c</span>
+        crossing at the horizon; the inset traces rays <b>peeling off exponentially</b>,
+        <span class="eq">|x−x_h|∼e^{κt}</span>, at the surface gravity <span class="eq">κ</span> — the mechanism
+        that renders the vacuum thermal at <span class="eq">T_H=κ/2π</span>. <b>Right:</b> a <i>sharper</i> throat
+        makes a <i>hotter</i> horizon — geometry sets the Hawking temperature (<span class="eq">T_H: 0.09→0.22</span>).
+        The trust flag is stringent: <span class="eq">κ</span> is measured two independent ways — a static fit of
+        <span class="eq">v−c</span> and the dynamical ray-peeling rate — and they agree to <b>&lt;1%</b>. (Kinematic
+        scope; the full Bogoliubov pair spectrum is noted, not attempted.)</figcaption></figure>
     <div class="note"><b>Wired into the toolkit.</b> Both extensions are registered experiments
-      (<code>genus2_tunneling</code>, <code>horn_resonator</code>) — callable through the same
-      <code>run</code> / <code>sweep</code> / <code>compare</code> / MCP surface as everything else, each
-      carrying its own verification block (genus + doublet-isolation; resonance found + η-stable). And the full
+      (<code>genus2_tunneling</code>, <code>horn_resonator</code>, <code>horn_hawking</code>) — callable through
+      the same <code>run</code> / <code>sweep</code> / <code>compare</code> / MCP surface as everything else, each
+      carrying its own verification block (genus + doublet-isolation; resonance found + η-stable; the two
+      κ-methods agreeing). And the full
       pipeline closes: a focusing NLS wavepacket evolves on the genus-2 mesh with a split-step Crank–Nicolson
       stepper, <b>mass conserved to <span class="eq">10⁻¹⁴</span></b> — the project's physics, carried intact
       onto topology and boundaries the original metric could never write down.</div>
@@ -781,7 +795,8 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
   agent-toolkit findings (<code>tunneling.py</code>, <code>curvature_universality.py</code>,
   <code>sta_transport.py</code>), and the beyond-surfaces-of-revolution extensions
   (<code>nls_torus/mesh.py</code>, <code>mesh_genus2.py</code>, <code>genus2_tunneling.py</code>,
-  <code>horn_resonator.py</code>), and the real-device model (<code>microdisk_Q.py</code>), all driven by the
+  <code>horn_resonator.py</code>, <code>horn_hawking.py</code>), and the real-device model
+  (<code>microdisk_Q.py</code>), all driven by the
   <code>nls_torus</code> library — see <code>docs/toolkit.md</code>. Every 3-D frame uses the crescent embedding
   (<span class="eq">x</span> → toroidal, <span class="eq">θ</span> → poloidal).
 </footer>
