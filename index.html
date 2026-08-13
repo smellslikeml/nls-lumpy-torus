@@ -495,6 +495,15 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
         within 0.2%), and recurs (Fermi–Pasta–Ulam), the bright events walking across the ring (left). Geometry
         is the knob: the effective coupling and <span class="eq">A(x)</span> set the MI gain, hence how tall and
         how often the rogue events come. Real-world: optical and hydrodynamic rogue waves.</figcaption></figure>
+    <figure class="wide"><img src="kibble_zurek.png" alt="Kibble-Zurek scaling from a quench on the ring" loading="lazy">
+      <figcaption><b>Kibble–Zurek — defects from a finite-rate quench.</b> Ramp the ring's focusing coupling
+        up through the modulational-instability onset over a quench time <span class="eq">τ_Q</span>. The
+        uniform state can't follow adiabatically: its response <b>freezes</b> near the transition and the
+        instability then imprints a pattern whose wavenumber <span class="eq">k*</span> is set by <i>when</i> it
+        froze — faster quench → finer pattern, more defects (left). Averaged over noise realizations,
+        <span class="eq">k*</span> follows a clean <b>power law</b> <span class="eq">k*∼τ_Q^{−0.23}</span> across
+        a decade (right) — the universal Kibble–Zurek scaling, with the geometry's effective coupling as the
+        control parameter. Real-world: KZ defect-counting in cold atoms, ion chains, and superfluids.</figcaption></figure>
     <figure class="wide"><img src="dispersion_design.png" alt="geometric dispersion engineering" loading="lazy">
       <figcaption><b>Prototype — geometric dispersion engineering.</b> The WG spectrum
         <span class="eq">ω_m = E_0(m)</span> <i>is</i> the resonator's modal dispersion, so the lump profile is
@@ -590,6 +599,14 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
       Kartashov, Malomed &amp; Torner, <a href="https://arxiv.org/abs/1010.2254"><i>Solitons in nonlinear
       lattices</i>, Rev. Mod. Phys. <b>83</b>, 247 (2011)</a>. Geometry <i>localising</i> blow-up on a curve:
       Godet (above).</li>
+    <li><b>Nonequilibrium &amp; topological transport</b> — Kibble–Zurek defect scaling: Zurek,
+      <a href="https://www.nature.com/articles/317505a0"><i>Nature</i> <b>317</b>, 505 (1985)</a>, and the
+      review of del Campo &amp; Zurek (<i>Int. J. Mod. Phys. A</i>, 2014); Thouless adiabatic charge pump:
+      Thouless, <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.27.6083"><i>Phys. Rev. B</i>
+      <b>27</b>, 6083 (1983)</a>; rogue waves / Peregrine soliton: Peregrine,
+      <i>J. Austral. Math. Soc. B</i> <b>25</b>, 16 (1983); quantum chaos &amp; level statistics: Bohigas,
+      Giannoni &amp; Schmit, <a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.52.1"><i>Phys.
+      Rev. Lett.</i> <b>52</b>, 1 (1984)</a>.</li>
   </ul>
 </section>
 
@@ -603,7 +620,7 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
   <code>lattice.py</code>, <code>topological.py</code>, <code>neural_operator.py</code>,
   <code>dynamical_stabilization.py</code>, <code>collapse_arrest.py</code>, <code>floquet.py</code>,
   <code>thouless.py</code>, <code>rogue.py</code>, <code>cubic_quintic.py</code>,
-  <code>quantum_chaos.py</code>). Every 3-D frame uses the crescent embedding
+  <code>quantum_chaos.py</code>, <code>kibble_zurek.py</code>). Every 3-D frame uses the crescent embedding
   (<span class="eq">x</span> → toroidal, <span class="eq">θ</span> → poloidal).
 </footer>
 
