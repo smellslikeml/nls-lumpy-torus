@@ -47,6 +47,9 @@ geometry is an exponential lever on Q but a null on the Townes-universal nonline
 `dtc_disorder` resolves the H2 negative: a clean driven ring is only a parametric amplifier, but
 adding on-site DISORDER (Anderson localization, the MBL stand-in) resurrects a rigid period-2
 discrete time crystal (order parameter survives ~15% drive imperfection; response locked to Omega/2).
+`kerr_horn` bridges the horn to the microdisk: a focusing Kerr nonlinearity on the horn's leaky mode
+redshifts it (self-phase modulation) and self-traps it (Q enhanced ~+66%) until a self-focusing
+instability collapses it — geometry sets the linear Q, the nonlinearity boosts then breaks it.
 
 ```python
 import nls_torus as nt

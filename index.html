@@ -672,10 +672,24 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
         The trust flag is stringent: <span class="eq">κ</span> is measured two independent ways — a static fit of
         <span class="eq">v−c</span> and the dynamical ray-peeling rate — and they agree to <b>&lt;1%</b>. (Kinematic
         scope; the full Bogoliubov pair spectrum is noted, not attempted.)</figcaption></figure>
-    <div class="note"><b>Wired into the toolkit.</b> Both extensions are registered experiments
-      (<code>genus2_tunneling</code>, <code>horn_resonator</code>, <code>horn_hawking</code>) — callable through
+    <figure class="wide"><img src="nonlinear_kerr_horn.png" alt="nonlinear Kerr on the horn leaky mode" loading="lazy">
+      <figcaption><b>The horn's leaky mode, made nonlinear — a bridge to the §13 Kerr comb.</b> §12 gave the
+        horn a leaky mode whose Q the throat geometry sets; §13 built a microcomb whose threshold rides on Q.
+        Here a <b>focusing Kerr</b> nonlinearity acts on that same radiating mode. We excite it and ring it down;
+        as the intracavity power decays, the instantaneous frequency and Q trace out their power dependence
+        (one run sweeps all powers; the <span class="eq">g=0</span> control is flat to
+        <span class="eq">10⁻¹³</span> at the geometric <span class="eq">Q=439</span>). <b>Left:</b> the resonance
+        <b>redshifts linearly</b> with power — Kerr self-phase modulation. <b>Right, the surprise:</b> the
+        nonlinearity doesn't spoil the leaky mode, it <b>self-traps</b> it — pulling the frequency deeper below
+        the throat barrier so it radiates <i>less</i>, lifting <span class="eq">Q</span> by <b>+66%</b> — until a
+        critical intracavity power triggers a <b>self-focusing instability</b> that collapses it (the redshift
+        saturates at the very same power, confirming a real mode transition, not a fit artifact). Geometry sets
+        the linear Q; the nonlinearity boosts it, then breaks it.</figcaption></figure>
+    <div class="note"><b>Wired into the toolkit.</b> These extensions are registered experiments
+      (<code>genus2_tunneling</code>, <code>genus2_collapse</code>, <code>horn_resonator</code>,
+      <code>horn_hawking</code>, <code>kerr_horn</code>) — callable through
       the same <code>run</code> / <code>sweep</code> / <code>compare</code> / MCP surface as everything else, each
-      carrying its own verification block (genus + doublet-isolation; resonance found + η-stable; the two
+      carrying its own verification block (genus + doublet-isolation; Townes match; resonance found + η-stable; the two
       κ-methods agreeing). And the full
       pipeline closes: a focusing NLS wavepacket evolves on the genus-2 mesh with a split-step Crank–Nicolson
       stepper, <b>mass conserved to <span class="eq">10⁻¹⁴</span></b> — the project's physics, carried intact
@@ -816,7 +830,8 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
   agent-toolkit findings (<code>tunneling.py</code>, <code>curvature_universality.py</code>,
   <code>sta_transport.py</code>, <code>dtc_horn.py</code>), and the beyond-surfaces-of-revolution extensions
   (<code>nls_torus/mesh.py</code>, <code>mesh_genus2.py</code>, <code>genus2_tunneling.py</code>,
-  <code>genus2_collapse.py</code>, <code>horn_resonator.py</code>, <code>horn_hawking.py</code>), and the real-device model
+  <code>genus2_collapse.py</code>, <code>horn_resonator.py</code>, <code>horn_hawking.py</code>,
+  <code>nonlinear_kerr_horn.py</code>), and the real-device model
   (<code>microdisk_Q.py</code>), all driven by the
   <code>nls_torus</code> library — see <code>docs/toolkit.md</code>. Every 3-D frame uses the crescent embedding
   (<span class="eq">x</span> → toroidal, <span class="eq">θ</span> → poloidal).

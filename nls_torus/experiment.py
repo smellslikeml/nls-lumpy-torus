@@ -652,6 +652,59 @@ def genus2_collapse(d=1.30, ngrid=90):
                 series={}, summary=f"genus-2 focusing-onset M_c={Mc:.2f} (Townes 11.7; topology-blind)")
 
 
+@register
+def kerr_horn(Delta=0.26, A0=0.55, K=2.0, N=1200):
+    """Nonlinear Kerr on the horn's leaky mode — bridges the geometry-set resonator (Q) to
+    nonlinear microresonator physics. Excite the eta-stable linear leaky mode and ring it
+    down under i u_t = (-d^2 + V_k - i*CAP) u - |u|^2 u; as intracavity power decays the
+    resonance frequency and Q are read vs power. Focusing Kerr REDSHIFTS the mode (self-phase
+    modulation, linear in power) and self-traps it (Q enhanced) until a self-focusing
+    instability at P_c collapses it. Returns linear Q, redshift slope, peak Q enhancement, P_c."""
+    import scipy.sparse as _sp
+    from scipy.sparse.linalg import eigs as _eigs, splu as _splu
+    A_open, xt, w, Xmax, Xpml = 1.0, 8.0, 1.0, 40.0, 30.0
+    x = np.linspace(0, Xmax, N); dx = x[1] - x[0]
+    Vk = K ** 2 / (A_open - Delta * np.exp(-((x - xt) / w) ** 2)) ** 2
+
+    def Hm(eta):
+        cap = eta * np.clip((x - Xpml) / (Xmax - Xpml), 0, None) ** 2
+        return _sp.diags([-1/dx**2*np.ones(N-1), 2/dx**2 + Vk - 1j*cap, -1/dx**2*np.ones(N-1)], [-1, 0, 1]).tocsc()
+
+    Vopen, Vbar = K ** 2, K ** 2 / (1 - Delta) ** 2
+    v1, vec1 = _eigs(Hm(2.0), k=18, sigma=K**2 + (np.pi/xt)**2 - 0.02j)
+    v2, _ = _eigs(Hm(4.5), k=18, sigma=K**2 + (np.pi/xt)**2 - 0.02j)
+    best = None
+    for e, c in zip(v1, vec1.T):
+        if Vopen < e.real < Vbar and e.imag < -1e-12:
+            rel = abs(v2[np.argmin(np.abs(v2 - e))] - e) / max(abs(e.imag), 1e-12)
+            if rel < 0.05 and (best is None or rel < best[2]):
+                best = (e, c, rel)
+    if best is None:
+        return dict(metrics={}, verification={"mode_found": False}, series={}, summary="no eta-stable leaky mode")
+    e, psi, rel = best; E_r = e.real; Gamma = -2 * e.imag; Qlin = E_r / Gamma; psi = psi / np.abs(psi).max()
+    H = Hm(2.0); I = _sp.identity(N, format="csc"); dt = 2e-3
+    lu = _splu(I + 0.5j*dt*H); Bop = I - 0.5j*dt*H
+    u = (A0 * psi).astype(complex); wp = np.conj(psi) / np.sum(np.abs(psi)**2); ts = []; cs = []
+    for i in range(int(300/dt)):
+        u = lu.solve(Bop @ u); u = u * np.exp(1j*np.abs(u)**2*dt)
+        if i % 40 == 0:
+            ts.append(i*dt); cs.append(np.sum(wp * u))
+    ts = np.array(ts); ph = np.unwrap(np.angle(np.array(cs))); amp = np.abs(np.array(cs))
+    P = []; om = []; Q = []; win = 50
+    for i in range(0, len(ts) - win, win // 2):
+        j = i + win; dtw = ts[j] - ts[i]; o = -(ph[j] - ph[i]) / dtw
+        gm = -(np.log(amp[j]) - np.log(amp[i])) / dtw
+        om.append(o); Q.append(o / (2*gm) if gm > 1e-9 else np.nan); P.append(np.mean(amp[i:j]**2))
+    P = np.array(P); om = np.array(om); Q = np.array(Q)
+    Pc = float(P[np.nanargmax(Q)]); Qmax = float(np.nanmax(Q)); below = P <= Pc
+    slope = float(np.polyfit(P[below], (om[below] - E_r) / Gamma, 1)[0]) if below.sum() > 2 else 0.0
+    return dict(metrics={"Q_linear": float(Qlin), "redshift_slope_lw_per_P": slope, "Q_max": Qmax,
+                         "Q_enhancement_pct": float((Qmax/Qlin - 1)*100), "P_c": Pc, "E_r": float(E_r)},
+                verification={"mode_eta_stable": rel < 0.05, "Q_enhanced": Qmax > 1.1 * Qlin},
+                series={}, summary=f"leaky Q={Qlin:.0f}; Kerr redshift {slope:.0f} lw/P, self-traps to "
+                                   f"Q={Qmax:.0f} (+{(Qmax/Qlin-1)*100:.0f}%), instability at P_c={Pc:.2f}")
+
+
 def _clean(obj):
     """Recursively convert numpy scalars/bools/arrays to native Python so the Result
     is JSON-serialisable (the agent tool speaks JSON)."""
