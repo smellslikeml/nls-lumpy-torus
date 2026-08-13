@@ -411,6 +411,13 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
         <span class="eq">ε=π</span>, an <b>anomalous mode with no static analogue</b> (left), the two living on
         opposite edges (right). The time-domain sibling of the chiral-twist bands above: drive, don't twist.
         Real-world: Floquet photonics and periodically-driven cold atoms.</figcaption></figure>
+    <figure class="wide"><img src="thouless.png" alt="Thouless adiabatic pump from a sliding lump lattice" loading="lazy">
+      <figcaption><b>Thouless pump — quantized transport from a sliding lattice.</b> Slide and breathe the lump
+        chain around a cycle and the filled band's Wannier centre winds by an <b>integer</b>: exactly one unit
+        cell pumped across the strip per period (left; a trivial loop pumps zero), independent of the drive's
+        details. On an open strip the same topology drags a single <b>edge state across the gap</b> from one
+        edge to the other (right). Robust, geometry-driven transport — the adiabatic cousin of the Floquet
+        drive above. Real-world: topological pumps in photonic waveguide arrays and cold atoms.</figcaption></figure>
     <figure class="wide"><img src="soliton_barrier.png" alt="soliton trapping vs escape" loading="lazy">
       <figcaption><b>A soliton in the geometric well.</b> A small kick leaves a bright soliton librating in
         the belly; a larger one sends it circulating over the necks — the nonlinear echo of the geodesic
@@ -466,6 +473,13 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
       attractive BECs (the "Bosenova"), in self-focusing / <b>filamentation</b> of intense laser beams, and in
       Langmuir-wave collapse in plasmas — the reduced-model bridge to the fusion-adjacent question (§10, dynamical
       lens). Full cites in §11.</div>
+    <figure class="wide"><img src="rogue.png" alt="rogue waves and Peregrine breather on the belly ring" loading="lazy">
+      <figcaption><b>Rogue waves on the belly ring.</b> Seed the focusing ring's longest-wavelength unstable
+        mode and modulational instability grows it into an <b>Akhmediev breather</b> — a wave that rises from
+        nowhere, peaks at <b>3× the background</b> (right; the <b>Peregrine</b> rogue-wave limit, reached to
+        within 0.2%), and recurs (Fermi–Pasta–Ulam), the bright events walking across the ring (left). Geometry
+        is the knob: the effective coupling and <span class="eq">A(x)</span> set the MI gain, hence how tall and
+        how often the rogue events come. Real-world: optical and hydrodynamic rogue waves.</figcaption></figure>
     <figure class="wide"><img src="dispersion_design.png" alt="geometric dispersion engineering" loading="lazy">
       <figcaption><b>Prototype — geometric dispersion engineering.</b> The WG spectrum
         <span class="eq">ω_m = E_0(m)</span> <i>is</i> the resonator's modal dispersion, so the lump profile is
@@ -572,7 +586,8 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
   <code>hero.py</code>), and the frontier prototypes (<code>faraday.py</code>,
   <code>expanding_torus.py</code>, <code>analog_horizon.py</code>, <code>dispersion_design.py</code>,
   <code>lattice.py</code>, <code>topological.py</code>, <code>neural_operator.py</code>,
-  <code>dynamical_stabilization.py</code>, <code>collapse_arrest.py</code>, <code>floquet.py</code>). Every 3-D frame uses the crescent embedding
+  <code>dynamical_stabilization.py</code>, <code>collapse_arrest.py</code>, <code>floquet.py</code>,
+  <code>thouless.py</code>, <code>rogue.py</code>). Every 3-D frame uses the crescent embedding
   (<span class="eq">x</span> → toroidal, <span class="eq">θ</span> → poloidal).
 </footer>
 
