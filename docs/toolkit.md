@@ -80,6 +80,13 @@ Verbs:
 | `run_experiment(name, params)` | one run → `{metrics, verification, provenance, summary}` |
 | `sweep(name, param, values, base_params, metric)` | scan one parameter; returns per-value metric + verification **and a log-log scaling fit** |
 | `compare(name, configs, metric)` | run labelled configs side by side; reports which extremises the metric |
+| `compose(code, resolutions)` | run a NEW experiment (`run(Nx)` you write) with **harness-owned** verification — the server computes conservation + grid-convergence itself; you can't self-certify |
+| `search_arxiv(query)` | cross-check a finding against the literature (no key) |
+| `probe(question, geometry)` | hand the whole design→run→verify loop to the generative `ManifoldExperimenter` (NOOA/Gemini sub-agent, py3.12 subprocess) |
+
+The last three expose the `ManifoldExperimenter` itself: `compose` lets the calling agent
+write the experiment and have the harness verify it; `probe` delegates the full loop to
+the autonomous sub-agent.
 
 `sweep` turns a scaling question into one call. Example — Kibble–Zurek:
 

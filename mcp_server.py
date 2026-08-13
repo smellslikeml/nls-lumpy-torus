@@ -23,6 +23,7 @@ from mcp.server.fastmcp import FastMCP
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # find nls_torus regardless of cwd
 from nls_torus import experiment as X
+from nls_torus.agent import tool_compose, tool_search_arxiv   # deterministic (no nooa/LLM)
 
 mcp = FastMCP("nls-torus")
 
@@ -119,6 +120,100 @@ def compare(name: str, configs: dict, metric: str = "") -> dict:
             out["max_label"] = max(scored, key=scored.get)
             out["min_label"] = min(scored, key=scored.get)
     return out
+
+
+@mcp.tool()
+def compose(code: str, resolutions: list = [64, 96]) -> dict:
+    """Design and run a NEW experiment the registered ones don't express, with
+    HARNESS-OWNED verification. `code` must define run(Nx) -> {"observable": <the answer>,
+    "mass_series": [diagnostics.mass(U, surf["Mdiag"]) per step], "energy_series": [...],
+    "metrics": {...}}. The server runs it at two resolutions in a subprocess sandbox and
+    COMPUTES the trust flags itself (mass/energy conservation from the series,
+    grid_converged from whether `observable` agrees across resolutions) — you cannot set
+    them. Returns {metrics, verification, trustworthy}. The library is preloaded:
+    build_surface, ring_grid, wg_chain, CNStepper, RingStepper, fields, diagnostics,
+    bogoliubov, geometry.
+
+    Example:
+        def run(Nx):
+            surf = build_surface(Nx, Nx); step = CNStepper(surf, dt=1e-3)
+            U = fields.localized_hump(surf, amp=6.0)
+            M, K = surf["Mdiag"], surf["K"]
+            ms=[diagnostics.mass(U,M)]; es=[diagnostics.energy(U,K,M,-1.0)]; pk=diagnostics.peak(U); tc=None
+            for i in range(1,1500):
+                U=step.step(U,sigma3=-1.0); pk=max(pk,diagnostics.peak(U))
+                ms.append(diagnostics.mass(U,M)); es.append(diagnostics.energy(U,K,M,-1.0))
+                if pk>150: tc=i*1e-3; break
+            return {"observable": tc is not None, "mass_series": ms, "energy_series": es,
+                    "metrics": {"collapse_time": tc, "peak_max": pk}}
+    """
+    return tool_compose(code, resolutions=tuple(resolutions))
+
+
+@mcp.tool()
+def search_arxiv(query: str, max_results: int = 5) -> dict:
+    """Search arXiv (title/abstract/authors) to cross-check a numerical finding against
+    the literature or find the relevant paper — the Townes critical mass, a Kibble-Zurek
+    exponent, the analog-Hawking temperature. Returns {id, title, authors, summary, url}
+    per hit. No API key. The RUN is the evidence; use this only to sanity-check."""
+    return tool_search_arxiv(query, max_results)
+
+
+def _run_probe_subprocess(question, geometry, max_iterations):
+    """Delegate a probe to the generative ManifoldExperimenter in a py3.12+nooa
+    subprocess (the server itself may be py3.10). Interpreter via NLS_AGENT_PYTHON."""
+    import subprocess
+    import json
+    import re
+    import pathlib
+    agent_py = os.environ.get("NLS_AGENT_PYTHON",
+                              str(pathlib.Path.home() / "metadata_resolver/.venv/bin/python"))
+    if not os.path.exists(agent_py):
+        return {"error": f"probe needs a py3.12+nooa interpreter; set NLS_AGENT_PYTHON (tried {agent_py})"}
+    repo = os.path.dirname(os.path.abspath(__file__))
+    env = dict(os.environ)
+    env["PYTHONPATH"] = repo + os.pathsep + env.get("PYTHONPATH", "")
+    env.update(PROBE_Q=question, PROBE_GEO=geometry, PROBE_ITERS=str(int(max_iterations)))
+    if "GOOGLE_API_KEY" not in env:                      # fall back to ~/.bashrc
+        try:
+            m = re.search(r'^(?:export )?GOOGLE_API_KEY=["\']?([^"\'\n]+)',
+                          (pathlib.Path.home() / ".bashrc").read_text(), re.M)
+            if m:
+                env["GOOGLE_API_KEY"] = m.group(1)
+        except Exception:
+            pass
+    if "GOOGLE_API_KEY" not in env:
+        return {"error": "probe needs GOOGLE_API_KEY in the server env"}
+    driver = (
+        "import asyncio, json, os, dataclasses\n"
+        "import nls_torus.agent as A\n"
+        "async def main():\n"
+        "    ag = A.ManifoldExperimenter(geometry=os.environ['PROBE_GEO'],\n"
+        "                                max_iterations=int(os.environ['PROBE_ITERS']))\n"
+        "    res = await ag.probe(os.environ['PROBE_Q'])\n"
+        "    print('__PROBE__' + json.dumps(dataclasses.asdict(res)))\n"
+        "asyncio.run(main())\n"
+    )
+    try:
+        p = subprocess.run([agent_py, "-c", driver], capture_output=True, text=True,
+                           timeout=600, env=env, cwd=repo)
+    except subprocess.TimeoutExpired:
+        return {"error": "probe timed out"}
+    for line in p.stdout.splitlines():
+        if line.startswith("__PROBE__"):
+            return json.loads(line[len("__PROBE__"):])
+    return {"error": (p.stderr or "probe produced no result")[-2000:]}
+
+
+@mcp.tool()
+def probe(question: str, geometry: str = "lumpy_torus", max_iterations: int = 16) -> dict:
+    """Delegate to the generative ManifoldExperimenter (NOOA/Gemini sub-agent): it designs,
+    runs, and HARNESS-verifies a NEW experiment to answer `question` on `geometry`, then
+    returns {question, summary, metrics, verification, trustworthy}. Slow (LLM + compute)
+    and needs a py3.12+nooa interpreter + GOOGLE_API_KEY (runs in a subprocess). For most
+    cases prefer composing directly with the `compose` tool (you are already the reasoner);
+    use `probe` to hand the whole design-run-verify loop to the autonomous agent."""
+    return _run_probe_subprocess(question, geometry, max_iterations)
 
 
 if __name__ == "__main__":

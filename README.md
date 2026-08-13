@@ -216,9 +216,13 @@ python3 experiment_tool.py --list
 python3 experiment_tool.py run collapse '{"amp":6,"sigma5":0.4}'
 ```
 
-It's also an **MCP server** (`mcp_server.py`) with `run_experiment` / `sweep` /
-`compare` verbs — `claude mcp add nls-torus -- python3 mcp_server.py`. A `sweep` returns
-a scaling fit in one call (e.g. Kibble–Zurek `k* ~ τ_Q^{-0.22}`, all points verified).
+It's also an **MCP server** (`mcp_server.py`) — `claude mcp add nls-torus -- python3
+mcp_server.py` — with seven verbs: `list_experiments`, `run_experiment`, `sweep` (returns
+a scaling fit in one call, e.g. Kibble–Zurek `k* ~ τ_Q^{-0.22}`), `compare`, **`compose`**
+(run a new `run(Nx)` experiment with harness-owned verification — the server computes
+conservation + grid-convergence itself), **`search_arxiv`**, and **`probe`** (hand the
+whole design→run→verify loop to the generative `ManifoldExperimenter` sub-agent). The last
+three expose the agent's capabilities to any MCP client.
 
 For questions no registered experiment covers, there's a **generative agent**
 (`nls_torus/agent.py`, `ManifoldExperimenter` — a NVIDIA NOOA `Agent`): `probe(question)`
