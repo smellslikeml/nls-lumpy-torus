@@ -393,6 +393,55 @@ def quantum_chaos(lam_weak=2.5, lam_strong=120.0, Nx=48, Nth=48, geometry="lumpy
                 series={}, summary=f"P(s<0.3): weak {rw:.2f} (clustered), strong {rs:.2f} (GOE-like)")
 
 
+@register
+def sta_transport(D=15.0, T=4.0, Ctrap=0.25, g=2.0, T_hold=26.0,
+                  N=2048, Lbox=80.0, dt=2e-3):
+    """Shortcut-to-adiabaticity transport of a bright soliton by a moving harmonic trap
+    (the belly well of a movable lump). Move the trap centre 0->D in time T under three
+    protocols and measure residual centre-of-mass oscillation after arrival: naive linear
+    drag and a smooth poly5 ramp leave the soliton sloshing (Kohn mode); the inverse-
+    engineered STA trajectory X(t)=q+q''/omega^2 (omega^2=4C) delivers it AT REST even for
+    fast, non-adiabatic T. Verification: split-step mass conservation + STA actually wins."""
+    x = np.linspace(-Lbox / 2, Lbox / 2, N, endpoint=False); dx = Lbox / N
+    k = 2 * np.pi * np.fft.fftfreq(N, d=dx); omega2 = 4 * Ctrap
+    Lh = np.exp(-1j * k ** 2 * dt / 2)
+
+    def p5(s): return 10 * s ** 3 - 15 * s ** 4 + 6 * s ** 5
+    def p5dd(s): return 60 * s - 180 * s ** 2 + 120 * s ** 3
+
+    def Xc(t, kind):
+        if t >= T: return D
+        s = t / T
+        if kind == "linear": return D * s
+        q = D * p5(s)
+        return q if kind == "poly5" else q + (D * p5dd(s) / T ** 2) / omega2
+
+    def go(kind):
+        u = 1.0 / np.cosh(x); m0 = (np.abs(u) ** 2).sum() * dx
+        coms = []; mmax = 0.0
+        for i in range(int((T + T_hold) / dt)):
+            t = (i + 0.5) * dt; V = Ctrap * (x - Xc(t, kind)) ** 2
+            u = np.fft.ifft(Lh * np.fft.fft(u))
+            u = u * np.exp(-1j * (V - g * np.abs(u) ** 2) * dt)
+            u = np.fft.ifft(Lh * np.fft.fft(u))
+            rho = np.abs(u) ** 2; m = rho.sum() * dx; mmax = max(mmax, abs(m - m0) / m0)
+            if (i + 1) * dt >= T: coms.append((x * rho).sum() * dx / m)
+        coms = np.array(coms)
+        return float(coms.max() - coms.min()), float(abs(coms[0] - D)), mmax
+
+    osc, err, drift = {}, {}, 0.0
+    for kd in ("linear", "poly5", "sta"):
+        osc[kd], err[kd], d_ = go(kd); drift = max(drift, d_)
+    sta_wins = osc["sta"] < 0.1 * min(osc["linear"], osc["poly5"])
+    return dict(metrics={"resid_osc_linear": osc["linear"], "resid_osc_poly5": osc["poly5"],
+                         "resid_osc_sta": osc["sta"], "arrive_err_sta": err["sta"],
+                         "trap_period": float(2 * np.pi / np.sqrt(omega2)), "T": T},
+                verification={"mass_conserved": drift < 1e-8, "sta_arrives_at_rest": sta_wins},
+                series={}, summary=(f"STA residual COM oscillation {osc['sta']:.3f} vs "
+                                    f"linear {osc['linear']:.2f} / poly5 {osc['poly5']:.2f} "
+                                    f"(fast T={T:g} < trap period {2*np.pi/np.sqrt(omega2):.1f})"))
+
+
 def _clean(obj):
     """Recursively convert numpy scalars/bools/arrays to native Python so the Result
     is JSON-serialisable (the agent tool speaks JSON)."""
