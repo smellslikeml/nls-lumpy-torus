@@ -44,6 +44,9 @@ gravity extracted two independent ways whose agreement is the trust flag; sharpe
 And `microdisk_Q` takes it to a real device: the radiation-limited Q of a silica-microdisk
 whispering-gallery mode (as radial tunnelling) + the Kerr-comb threshold `P_th ~ 1/Q^2`, showing
 geometry is an exponential lever on Q but a null on the Townes-universal nonlinear threshold.
+`dtc_disorder` resolves the H2 negative: a clean driven ring is only a parametric amplifier, but
+adding on-site DISORDER (Anderson localization, the MBL stand-in) resurrects a rigid period-2
+discrete time crystal (order parameter survives ~15% drive imperfection; response locked to Omega/2).
 
 ```python
 import nls_torus as nt

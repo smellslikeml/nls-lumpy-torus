@@ -571,6 +571,49 @@ def horn_hawking(throat_w=1.2, mu=1.0, g=1.0):
                                    f"(static/dynamical agree {rel*100:.1f}%)")
 
 
+@register
+def dtc_disorder(W=20.0, e=0.1, L=64, Jf=0.4, U=1.0, tf=1.0, nper=60, nseed=6):
+    """Disorder-stabilized discrete time crystal on a driven nonlinear lattice — the
+    resolution of the H2 negative (a CLEAN drive is only a parametric amplifier, not a DTC).
+    Each Floquet period = an imperfect dimerized pi-swap flipping a charge-density wave, then
+    free evolution under on-site DISORDER (strength W, the Anderson-localizing stand-in for
+    MBL) + hopping + interaction. Returns the period-2 order parameter O (subharmonic
+    amplitude, seed-averaged) and rigidity vs the drive imperfection e. Trust flag: the
+    response locks to exactly Omega/2. W=0 is the clean negative control (O ~ 0, not locked)."""
+    dt = 0.02
+
+    def deriv(p, eps):
+        return -1j * (eps * p - Jf * (np.roll(p, 1) + np.roll(p, -1)) + U * np.abs(p) ** 2 * p)
+
+    def free(psi, eps):
+        for _ in range(int(round(tf / dt))):
+            k1 = deriv(psi, eps); k2 = deriv(psi + 0.5*dt*k1, eps)
+            k3 = deriv(psi + 0.5*dt*k2, eps); k4 = deriv(psi + dt*k3, eps)
+            psi = psi + dt/6*(k1 + 2*k2 + 2*k3 + k4)
+        return psi
+
+    Os = []; fpk = 0.0
+    for s in range(nseed):
+        rng = np.random.default_rng(s); eps = rng.uniform(-W, W, L)
+        psi = np.zeros(L, complex); psi[0::2] = 1.0; th = (np.pi/2) * (1 - e); Is = []
+        for _ in range(nper):
+            a = psi[0::2].copy(); b = psi[1::2].copy()
+            psi[0::2] = np.cos(th)*a - 1j*np.sin(th)*b; psi[1::2] = -1j*np.sin(th)*a + np.cos(th)*b
+            psi = free(psi, eps); tot = np.sum(np.abs(psi)**2) + 1e-30
+            Is.append((np.sum(np.abs(psi[0::2])**2) - np.sum(np.abs(psi[1::2])**2)) / tot)
+        Is = np.array(Is); h = nper//2
+        Os.append(abs(np.mean(Is[h:] * (-1.0)**np.arange(h, nper))))
+        if s == 0:
+            seg = Is[nper//4:] - Is[nper//4:].mean(); ff = np.fft.rfftfreq(len(seg), d=1.0)
+            fpk = float(ff[1 + np.argmax(np.abs(np.fft.rfft(seg))[1:])])
+    O = float(np.mean(Os))
+    return dict(metrics={"order_parameter": O, "order_std": float(np.std(Os)),
+                         "peak_freq": fpk, "W": W, "e": e},
+                verification={"subharmonic_locked": abs(fpk - 0.5) < 0.03 and O > 0.15},
+                series={}, summary=f"period-2 order O={O:.2f} at W={W}, e={e} "
+                                   f"(peak freq {fpk:.3f}; a DTC when W is large)")
+
+
 def _clean(obj):
     """Recursively convert numpy scalars/bools/arrays to native Python so the Result
     is JSON-serialisable (the agent tool speaks JSON)."""

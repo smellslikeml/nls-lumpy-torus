@@ -596,6 +596,19 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
       disorder / many-body-localization mechanism to rigidify the subharmonic or arrest heating — so the honest
       answer is <i>parametric amplifier, not time crystal</i>, and the metrics simply declined to certify a
       rigidity that isn't there.</div>
+    <figure class="wide"><img src="dtc_horn.png" alt="disorder-stabilized discrete time crystal" loading="lazy">
+      <figcaption><b>…and the negative, followed up: what the clean ring was missing was disorder.</b> The H2
+        diagnosis was specific — a clean mean-field system has no localization to rigidify the subharmonic — so
+        we supplied exactly that: <b>geometric disorder</b> (random on-site energies, the Anderson-localizing
+        stand-in for many-body localization) on a driven nonlinear lattice, each period an <i>imperfect</i>
+        π-swap that flips a density wave. <b>Left:</b> the demodulated period-2 response
+        <span class="eq">I_p(−1)^p</span> — with disorder it holds a <b>rigid, coherent</b> value (a genuine
+        time crystal); the clean lattice swings <b>incoherently through zero</b> (the H2 case, reproduced as the
+        control). <b>Right:</b> the rigidity — the order parameter survives drive imperfection out to
+        <span class="eq">e≈0.15</span> with disorder (<span class="eq">O≈0.66</span>) but is dead flat without it.
+        The response locks to <b>exactly <span class="eq">Ω/2</span></b> (the trust flag). The open-horn leakage
+        is ~neutral (green ≈ blue): <i>disorder</i>, not openness, is what the negative result was pointing at —
+        a negative turned into a positive by taking the diagnosis literally.</figcaption></figure>
   </div>
 </section>
 
@@ -793,7 +806,7 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
   <code>thouless.py</code>, <code>rogue.py</code>, <code>cubic_quintic.py</code>,
   <code>quantum_chaos.py</code>, <code>kibble_zurek.py</code>, <code>hawking.py</code>), and the
   agent-toolkit findings (<code>tunneling.py</code>, <code>curvature_universality.py</code>,
-  <code>sta_transport.py</code>), and the beyond-surfaces-of-revolution extensions
+  <code>sta_transport.py</code>, <code>dtc_horn.py</code>), and the beyond-surfaces-of-revolution extensions
   (<code>nls_torus/mesh.py</code>, <code>mesh_genus2.py</code>, <code>genus2_tunneling.py</code>,
   <code>horn_resonator.py</code>, <code>horn_hawking.py</code>), and the real-device model
   (<code>microdisk_Q.py</code>), all driven by the
