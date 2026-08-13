@@ -442,6 +442,62 @@ def sta_transport(D=15.0, T=4.0, Ctrap=0.25, g=2.0, T_hold=26.0,
                                     f"(fast T={T:g} < trap period {2*np.pi/np.sqrt(omega2):.1f})"))
 
 
+@register
+def genus2_tunneling(d=1.30, ngrid=80):
+    """Genus-2 which-handle doublet splitting on a triangulated surface — past surfaces of
+    revolution. Builds a connected genus-2 mesh (two-tori marching cubes) and returns the
+    first-excited Laplace-Beltrami eigenvalue = the inter-handle tunnelling splitting; a
+    thinner connecting neck (larger d) lowers it. Verifies genus-2 topology + that the mode
+    is an isolated doublet (needs scikit-image)."""
+    from . import mesh as mo
+    V, F = mo.two_tori_genus2(d=d, ngrid=ngrid)
+    chi, g = mo.euler_genus(V, F)
+    vals, _, _ = mo.laplace_spectrum(V, F, k=5)
+    lam1 = float(vals[1]); iso = float(vals[2] / max(lam1, 1e-9))
+    return dict(metrics={"splitting": lam1, "lambda0": float(vals[0]),
+                         "lam2_over_lam1": iso, "genus": int(g), "euler_chi": int(chi)},
+                verification={"genus2": g == 2, "doublet_isolated": iso > 2.0},
+                series={}, summary=f"genus-{g} inter-handle splitting lambda1={lam1:.4f} (d={d})")
+
+
+@register
+def horn_resonator(Delta=0.40, throat_w=1.0, k=2.0, Xmax=40.0, xt=8.0, Xpml=30.0, N=1600):
+    """Non-compact horn resonator: a cavity radiating into a semi-infinite horn through a
+    throat (a dip in A(x), i.e. a barrier in V_k=k^2/A^2), closed by a complex absorbing
+    collar (CAP/PML). Returns the quality factor Q=E_r/Gamma of the PHYSICAL leaky
+    resonance — the one eta-invariant eigenvalue; every horn-continuum / PML artifact shifts
+    when the absorber strength eta changes, so eta-stability is the trust flag. Deeper throat
+    -> exponentially higher Q (tunnelling-limited)."""
+    import scipy.sparse as _sp
+    from scipy.sparse.linalg import eigs as _eigs
+
+    def _spec(eta):
+        x = np.linspace(0, Xmax, N); dx = x[1] - x[0]
+        A = 1.0 - Delta * np.exp(-((x - xt) / throat_w) ** 2); Vk = k ** 2 / A ** 2
+        cap = eta * np.clip((x - Xpml) / (Xmax - Xpml), 0, None) ** 2
+        H = _sp.diags([-1 / dx ** 2 * np.ones(N - 1), 2 / dx ** 2 + Vk - 1j * cap,
+                       -1 / dx ** 2 * np.ones(N - 1)], [-1, 0, 1]).tocsc()
+        v, _ = _eigs(H, k=18, sigma=k ** 2 + (np.pi / xt) ** 2 - 0.02j)
+        return v
+
+    Vopen, Vbar = k ** 2, k ** 2 / (1.0 - Delta) ** 2
+    v1, v2 = _spec(2.0), _spec(4.5); best = None
+    for e in v1:
+        if not (Vopen < e.real < Vbar and e.imag < -1e-12):
+            continue
+        rel = abs(v2[np.argmin(np.abs(v2 - e))] - e) / max(abs(e.imag), 1e-12)
+        if rel < 0.05 and (best is None or rel < best[1]):
+            best = (e, rel)
+    if best is None:
+        return dict(metrics={"Q": None}, verification={"resonance_found": False},
+                    series={}, summary="no eta-stable resonance (width below CAP floor)")
+    e, rel = best; Q = e.real / (-2 * e.imag)
+    return dict(metrics={"Q": float(Q), "E_r": float(e.real), "Gamma": float(-2 * e.imag),
+                         "V_barrier": float(Vbar), "eta_drift": float(rel)},
+                verification={"resonance_found": True, "eta_stable": rel < 0.05},
+                series={}, summary=f"leaky horn resonance E_r={e.real:.3f}, Q={Q:.0f} (eta-stable)")
+
+
 def _clean(obj):
     """Recursively convert numpy scalars/bools/arrays to native Python so the Result
     is JSON-serialisable (the agent tool speaks JSON)."""

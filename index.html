@@ -81,7 +81,8 @@
     into a control field and goes past the original question, into chaos, lattices, parametric amplification,
     an expanding-universe analogue, topological edge channels, and device design. Then §11 hands the loop
     itself to an agent — the solver as a verified tool — and reports what it found when it, not a human, chose
-    the next experiment.</p>
+    the next experiment. §12 then breaks the surface-of-revolution mould entirely, carrying the physics onto a
+    genus-2 mesh and an open, radiating horn.</p>
 </div>
 
 <section>
@@ -599,7 +600,56 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
 </section>
 
 <section>
-  <h2><span class="num">12</span>Background &amp; references</h2>
+  <h2><span class="num">12</span>Beyond surfaces of revolution — mesh &amp; non-compact extensions</h2>
+  <p class="sub">Everything above lives on the metric <span class="eq">ds²=dx²+A(x)²dθ²</span> — which can
+    only express <b>genus-1, rotationally-symmetric</b> shapes. The toolkit's
+    <a href="docs/toolkit.md">mesh module</a> carries the same physics onto an <b>arbitrary triangle mesh</b>
+    via the cotangent (finite-element) Laplace–Beltrami operator, and onto <b>non-compact</b> domains via a
+    complex absorbing collar. That opens two doors the surface-of-revolution engine cannot: a genuine
+    <b>second handle</b>, and an <b>open, radiating</b> geometry.</p>
+
+  <div class="deriv">
+    <p><b>Validation before new physics.</b> A discrete Laplacian on a hand-made mesh is exactly where silent
+      errors hide, so the operator is checked against a case with a known answer <i>first</i>: on the round
+      sphere it recovers the spectrum <span class="eq">−Δ = l(l+1) = 0, 2, 6, 12</span> with the right
+      multiplicities <span class="eq">1, 3, 5, 7</span> to sub-percent. Only then is it turned on new topology.
+      For the open horn the trust signal is different but just as load-bearing: an absorbing boundary spawns a
+      thicket of spurious <b>PML/continuum eigenvalues</b>, so a resonance is accepted only if it is
+      <b>invariant when the absorber strength changes</b> — the physical mode stays put, the artifacts move.</p>
+  </div>
+
+  <div class="grid">
+    <figure class="wide"><img src="genus2_tunneling.png" alt="genus-2 which-handle tunnelling doublet and neck sweep" loading="lazy">
+      <figcaption><b>H4 on a true genus-2 surface.</b> Two tori fused into a connected <b>genus-2</b> shape
+        (verified <span class="eq">χ=−2</span> at every step). Its first excited Laplace–Beltrami mode is the
+        <b>which-handle doublet</b> — one sign on each handle, a node at the connecting neck (left) — so
+        <span class="eq">λ₁</span> <i>is</i> the inter-handle tunnelling splitting, the higher-genus echo of the
+        two-lobe doublet in §11. Thin the neck (separate the tori) and the splitting falls monotonically,
+        <span class="eq">0.30→0.18</span> (right), while the doublet grows more isolated
+        (<span class="eq">λ₂/λ₁: 3.0→5.5</span>) as the handles decouple toward two independent zero modes.
+        Tunnelling across a handle, set by geometry.</figcaption></figure>
+    <figure class="wide"><img src="horn_resonator.png" alt="non-compact horn leaky resonator, geometry-set Q" loading="lazy">
+      <figcaption><b>A non-compact horn: geometry sets the Q of a leaky mode.</b> The meridian runs to a
+        semi-infinite horn; a <b>throat</b> (a dip in <span class="eq">A</span>, a barrier in
+        <span class="eq">V_k=k²/A²</span>) traps a cavity mode that slowly radiates out the open end, absorbed by
+        a <b>PML collar</b>. The operator is non-Hermitian, so the mode is a complex <b>resonance</b>
+        <span class="eq">E_r−iΓ/2</span> with a finite lifetime (left; <span class="eq">|ψ|²</span> cavity-bound,
+        leaking past the throat). Its width is <b>tunnelling-limited</b>, so deepening the throat drives the
+        quality factor <span class="eq">Q=E_r/Γ</span> up <b>exponentially</b> — a straight line on a log axis,
+        <span class="eq">Q: 284→85138</span> (right). Every point survived the absorber-independence check that
+        killed dozens of numerical artifacts.</figcaption></figure>
+    <div class="note"><b>Wired into the toolkit.</b> Both extensions are registered experiments
+      (<code>genus2_tunneling</code>, <code>horn_resonator</code>) — callable through the same
+      <code>run</code> / <code>sweep</code> / <code>compare</code> / MCP surface as everything else, each
+      carrying its own verification block (genus + doublet-isolation; resonance found + η-stable). And the full
+      pipeline closes: a focusing NLS wavepacket evolves on the genus-2 mesh with a split-step Crank–Nicolson
+      stepper, <b>mass conserved to <span class="eq">10⁻¹⁴</span></b> — the project's physics, carried intact
+      onto topology and boundaries the original metric could never write down.</div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">13</span>Background &amp; references</h2>
   <p class="sub">The experiment sits on a well-worn thread of geometry and physics — the reduction to a
     centrifugal-barrier problem is the same structure that appears across these lines of work.</p>
   <ul class="refs">
@@ -681,8 +731,11 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
   <code>dynamical_stabilization.py</code>, <code>collapse_arrest.py</code>, <code>floquet.py</code>,
   <code>thouless.py</code>, <code>rogue.py</code>, <code>cubic_quintic.py</code>,
   <code>quantum_chaos.py</code>, <code>kibble_zurek.py</code>, <code>hawking.py</code>), and the
-  agent-toolkit findings (<code>tunneling.py</code>, <code>curvature_universality.py</code>, driven by the
-  <code>nls_torus</code> library — see <code>docs/toolkit.md</code>). Every 3-D frame uses the crescent embedding
+  agent-toolkit findings (<code>tunneling.py</code>, <code>curvature_universality.py</code>,
+  <code>sta_transport.py</code>), and the beyond-surfaces-of-revolution extensions
+  (<code>nls_torus/mesh.py</code>, <code>mesh_genus2.py</code>, <code>genus2_tunneling.py</code>,
+  <code>horn_resonator.py</code>), all driven by the <code>nls_torus</code> library — see
+  <code>docs/toolkit.md</code>. Every 3-D frame uses the crescent embedding
   (<span class="eq">x</span> → toroidal, <span class="eq">θ</span> → poloidal).
 </footer>
 

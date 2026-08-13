@@ -29,8 +29,16 @@ nls_torus/
   diagnostics.py mass, energy, peak, spectrum, level_spacings + VERIFICATION
                  (conservation_drift, wronskian_residual)
   bogoliubov.py linear particle-production mode integrator (Wronskian-checked)
+  mesh.py       cotangent (FEM) Laplace-Beltrami on ARBITRARY triangle meshes — past
+                surfaces of revolution. Validated on the sphere (eig = l(l+1)); genus-2
+                generator (marching cubes, needs scikit-image) + non-compact horns
   experiment.py declarative experiments -> Result{metrics, verification, provenance, series, summary}
 ```
+
+Beyond the genus-1 metric `ds^2=dx^2+A(x)^2 dtheta^2`, three registered experiments run on
+`mesh.py`/CAP: `sta_transport` (shortcut-to-adiabaticity soliton transport), `genus2_tunneling`
+(which-handle doublet splitting on a true genus-2 surface — H4 on higher genus), and
+`horn_resonator` (geometry-set Q of a leaky mode in an open horn, gated by absorber-independence).
 
 ```python
 import nls_torus as nt
