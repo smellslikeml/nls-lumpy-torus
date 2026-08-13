@@ -114,45 +114,93 @@ def tool_compare(name, configs, metric=None) -> dict:
     return X.compare(name, configs, metric=metric)
 
 
-def tool_compose(code, timeout=120.0) -> dict:
-    """Run a short, NEW experiment written against the nls_torus library, for questions
-    no registered experiment expresses. Executes `code` in a SUBPROCESS sandbox (crash-
-    and time-isolated) with numpy + the library preloaded; the code must assign a dict
-    `result` (ideally with 'metrics' and 'verification'). Returns that dict, or {'error'}.
+def _rel_drift(series):
+    if not series:
+        return None
+    s0 = series[0]
+    return max(abs(v - s0) / (abs(s0) + 1e-300) for v in series)
 
-    Trust boundary: this runs agent-authored physics code — deploy the agent itself in a
-    sandboxed environment; the subprocess adds isolation and a hard time limit, not a
-    security boundary against hostile code."""
+
+def _observables_agree(a, b):
+    if isinstance(a, bool) or isinstance(b, bool):
+        return a == b
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        return abs(a - b) <= 0.1 * max(abs(a), abs(b), 1e-9)
+    return a == b
+
+
+def tool_compose(code, resolutions=(64, 96), mass_tol=1e-6, energy_tol=1e-2, timeout=180.0) -> dict:
+    """HARNESS-OWNED verification. The caller's `code` must define a function
+
+        run(Nx) -> {"observable": <number|bool|label answering the question>,
+                    "mass_series":   [diagnostics.mass(U,M) at each step],
+                    "energy_series": [diagnostics.energy(...) at each step],  # optional
+                    "metrics": {...}}                                          # optional extras
+
+    The harness runs it in a subprocess sandbox at two resolutions and COMPUTES the trust
+    flags itself — mass_conserved / energy_conserved from the returned series, and
+    grid_converged from whether `observable` agrees across resolutions. The caller cannot
+    set these flags (that closes the self-certification hole). Returns
+    {metrics, verification, trustworthy, provenance} with trustworthy = all flags True.
+
+    Trust boundary: runs agent-authored physics code — the subprocess gives crash/time
+    isolation, not a security sandbox; deploy the agent in a contained environment."""
     import os
     import subprocess
     import sys
     import json
     import textwrap
     repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    harness = (
+    res = [int(r) for r in resolutions]
+    driver = (
         "import json\n"
         "import numpy as np\n"
         "import nls_torus as nt\n"
         "from nls_torus import build_surface, ring_grid, wg_chain, CNStepper, RingStepper\n"
         "from nls_torus import fields, diagnostics, bogoliubov, geometry\n"
-        "result = {}\n"
         + textwrap.dedent(code) + "\n"
-        "print('__RESULT__' + json.dumps(nt.experiment._clean(result)))\n"
+        "assert callable(run), 'define run(Nx) -> dict'\n"
+        "out = {}\n"
+        f"for _Nx in {res!r}:\n"
+        "    _r = run(_Nx)\n"
+        "    out[str(_Nx)] = {'observable': _r.get('observable'),\n"
+        "                     'mass_series': [float(v) for v in _r.get('mass_series', [])],\n"
+        "                     'energy_series': [float(v) for v in _r.get('energy_series', [])],\n"
+        "                     'metrics': nt.experiment._clean(_r.get('metrics', {}))}\n"
+        "print('__RUNS__' + json.dumps(out))\n"
     )
     env = dict(os.environ)
     env["PYTHONPATH"] = repo + os.pathsep + env.get("PYTHONPATH", "")
     try:
-        p = subprocess.run([sys.executable, "-c", harness], capture_output=True,
+        p = subprocess.run([sys.executable, "-c", driver], capture_output=True,
                            text=True, timeout=timeout, env=env, cwd=repo)
     except subprocess.TimeoutExpired:
         return {"error": f"timeout after {timeout}s"}
+    runs = None
     for line in p.stdout.splitlines():
-        if line.startswith("__RESULT__"):
-            try:
-                return json.loads(line[len("__RESULT__"):])
-            except Exception as e:
-                return {"error": f"result was not JSON-serialisable: {e}"}
-    return {"error": (p.stderr or "code did not assign a `result` dict")[-2000:]}
+        if line.startswith("__RUNS__"):
+            runs = json.loads(line[len("__RUNS__"):])
+            break
+    if runs is None:
+        return {"error": (p.stderr or "run(Nx) did not execute or produced no output")[-2000:]}
+
+    lo, hi = str(res[0]), str(res[-1])
+    ver = {}
+    md = _rel_drift(runs[hi]["mass_series"])
+    if md is not None:
+        ver["mass_conserved"] = md < mass_tol
+    ed = _rel_drift(runs[hi]["energy_series"])
+    if ed is not None:
+        ver["energy_conserved"] = ed < energy_tol
+    ver["grid_converged"] = _observables_agree(runs[lo]["observable"], runs[hi]["observable"])
+    metrics = dict(runs[hi]["metrics"])
+    metrics.setdefault("observable", runs[hi]["observable"])
+    metrics["observable_by_resolution"] = {lo: runs[lo]["observable"], hi: runs[hi]["observable"]}
+    if md is not None:
+        metrics["mass_drift"] = md
+    return {"metrics": metrics, "verification": ver,
+            "trustworthy": bool(ver) and all(ver.values()),
+            "provenance": {"resolutions": res, "harness_computed_verification": True}}
 
 
 def tool_search_arxiv(query, max_results=5) -> dict:
@@ -214,43 +262,44 @@ def _make_experimenter_class(max_iterations=DEFAULT_MAX_ITERATIONS, **class_kwar
             """Run labelled configs of one experiment side by side."""
             return tool_compare(name, configs, metric)
 
-        def compose(self, code: str, timeout: float = 120.0) -> dict:
-            """Run a NEW experiment you write against the nls_torus library, for questions
-            the registered experiments don't express. `code` runs in a subprocess sandbox
-            with numpy + the library preloaded (build_surface, ring_grid, wg_chain,
-            CNStepper, RingStepper, fields, diagnostics, bogoliubov, geometry) and MUST
-            assign a dict `result` with a 'metrics' dict and a NON-EMPTY 'verification'
-            dict of boolean trust-flags. ALWAYS include a conservation check AND, when a
-            yes/no outcome (like "did it collapse?") drives the answer, a grid-refinement
-            check — run at two resolutions and flag whether the outcome agrees; a
-            resolution-dependent outcome is an artifact, not physics.
+        def compose(self, code: str, resolutions: tuple = (64, 96),
+                    timeout: float = 180.0) -> dict:
+            """Run a NEW experiment for questions the registered ones don't express, with
+            HARNESS-OWNED verification. Your `code` defines ONE function run(Nx) that sets
+            up + evolves the experiment at grid resolution Nx and RETURNS a dict:
 
-            Template to copy (collapse of a hump; conservation + grid-refinement):
+                {"observable": <the answer: a number, bool, or label>,
+                 "mass_series": [diagnostics.mass(U, surf["Mdiag"]) at each step],
+                 "energy_series": [diagnostics.energy(U, K, M, sigma3) at each step],  # optional
+                 "metrics": {...}}                                                     # optional
 
+            The HARNESS runs it at two resolutions and COMPUTES the trust flags itself
+            (mass/energy conservation from your series, grid_converged from whether
+            `observable` agrees across resolutions) — you do NOT set them, so you cannot
+            self-certify. It returns {metrics, verification, trustworthy}; copy that
+            verification + trustworthy VERBATIM into your ExperimentResult.
+
+            The library is preloaded in the sandbox: build_surface, ring_grid, wg_chain,
+            CNStepper, RingStepper, fields, diagnostics, bogoliubov, geometry.
+
+            Example:
                 def run(Nx):
                     surf = build_surface(Nx, Nx)
                     step = CNStepper(surf, dt=1e-3)
                     U = fields.localized_hump(surf, amp=6.0, wx=0.35, wth=0.35)
                     M, K = surf["Mdiag"], surf["K"]
-                    hm=[diagnostics.mass(U,M)]; he=[diagnostics.energy(U,K,M,-1.0)]
+                    ms=[diagnostics.mass(U,M)]; es=[diagnostics.energy(U,K,M,-1.0)]
                     pk=diagnostics.peak(U); tc=None
                     for i in range(1, 1500):
                         U = step.step(U, sigma3=-1.0); pk=max(pk, diagnostics.peak(U))
-                        hm.append(diagnostics.mass(U,M)); he.append(diagnostics.energy(U,K,M,-1.0))
+                        ms.append(diagnostics.mass(U,M)); es.append(diagnostics.energy(U,K,M,-1.0))
                         if pk > 150: tc = i*1e-3; break
-                    return dict(collapsed=tc is not None, t_c=tc, peak=pk,
-                                cons=diagnostics.conservation_drift(hm, he))
-                lo, hi = run(64), run(96)      # two resolutions
-                result = {
-                    "metrics": {"collapsed": hi["collapsed"], "t_c": hi["t_c"], "peak_max": hi["peak"]},
-                    "verification": {"mass_conserved": hi["cons"]["mass_conserved"],
-                                     "energy_conserved": hi["cons"]["energy_conserved"],
-                                     "grid_converged": lo["collapsed"] == hi["collapsed"]},
-                }
+                    return {"observable": tc is not None, "mass_series": ms,
+                            "energy_series": es, "metrics": {"collapse_time": tc, "peak_max": pk}}
 
             Prefer run_experiment/sweep/compare when they fit; use compose only for
-            genuinely new setups, and gate on the verification you compute."""
-            return tool_compose(code, timeout)
+            genuinely new setups."""
+            return tool_compose(code, resolutions=resolutions, timeout=timeout)
 
         def search_arxiv(self, query: str, max_results: int = 5) -> dict:
             """Search arXiv (title/abstract/authors) to check a numerical finding against
