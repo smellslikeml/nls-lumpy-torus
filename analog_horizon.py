@@ -30,7 +30,11 @@ for i, xi in enumerate(x):
     pos = pos[pos > 0]
     v[i] = pos[0] if xi < 0 else pos[-1]           # subsonic upstream, supersonic downstream
 rho = J / (v * A); c = np.sqrt(g * rho); M = v / c
-kappa = abs(np.gradient(v - c, x)[np.argmin(np.abs(x))])
+# surface gravity = |d(v-c)/dx| at the horizon, from a local linear fit that
+# excludes the sonic-point branch-selection kink (a single-point gradient there
+# under-reads it); robust to the fit window at kappa ~ 0.71.
+_m = (np.abs(x) > 0.02) & (np.abs(x) < 0.15)
+kappa = abs(np.polyfit(x[_m], (v - c)[_m], 1)[0])
 T_H = kappa / (2 * np.pi)
 
 # ---- sound characteristics: dx/dt = v -/+ c ----

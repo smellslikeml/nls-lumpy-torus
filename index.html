@@ -523,6 +523,15 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
         <b>sonic horizon provided by the geometry alone</b> (Hawking temperature <span class="eq">T_H</span>
         set by the throat's surface gravity). The upstream <span class="eq">v−c</span> sound rays diverge from
         the throat and can never cross it — nothing escapes the interior.</figcaption></figure>
+    <figure class="wide"><img src="hawking.png" alt="analog Hawking: exponential redshift and thermal spectrum" loading="lazy">
+      <figcaption><b>Prototype — the horizon radiates (analog Hawking).</b> Take that horizon's radiation
+        seriously. Near it the upstream characteristic obeys <span class="eq">dx/dt=v−c≈κ(x−x_h)</span>, so a
+        ray <b>peels off exponentially</b> (left, log axis; slope = the surface gravity
+        <span class="eq">κ≈0.7</span>, measured dynamically and matching the static value) — the unbounded
+        redshift that turns the vacuum into a <b>thermal</b> spectrum at <span class="eq">T_H=κ/2π≈0.11</span>
+        (right). Honest scope: this is the kinematic Hawking result (temperature + thermality mechanism); the
+        spontaneous pair spectrum <span class="eq">|β_ω|²</span> itself needs the dispersive
+        Bogoliubov–de Gennes scattering with its negative-norm partner mode — a noted next step.</figcaption></figure>
     <div class="note"><b>Driven-dissipative (scaffolded, <code>lle.py</code>).</b> A lump should pin a
       dissipative Kerr soliton — the soliton-microcomb regime, and a microtoroid resonator <i>is</i> a lumpy
       torus. Robust cavity-soliton nucleation needs a detuning-ramp protocol (a clean next step) rather than
@@ -620,7 +629,7 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
   <code>lattice.py</code>, <code>topological.py</code>, <code>neural_operator.py</code>,
   <code>dynamical_stabilization.py</code>, <code>collapse_arrest.py</code>, <code>floquet.py</code>,
   <code>thouless.py</code>, <code>rogue.py</code>, <code>cubic_quintic.py</code>,
-  <code>quantum_chaos.py</code>, <code>kibble_zurek.py</code>). Every 3-D frame uses the crescent embedding
+  <code>quantum_chaos.py</code>, <code>kibble_zurek.py</code>, <code>hawking.py</code>). Every 3-D frame uses the crescent embedding
   (<span class="eq">x</span> → toroidal, <span class="eq">θ</span> → poloidal).
 </footer>
 
