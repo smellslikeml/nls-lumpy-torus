@@ -92,6 +92,34 @@ sweep("kz_freeze", "tau_Q", [0.1, 0.4, 1.6, 6.4], metric="kstar_mean")
 `compare` does the three collapse regimes at once (bare collapses, cubic-quintic
 arrests, managed hastens), each tagged with its verification flag.
 
+## Generative agent — `ManifoldExperimenter` (NOOA)
+
+Where the MCP verbs *run the experiments we designed*, the agent *composes new ones on
+demand* for questions no registered experiment covers. It's a NOOA (`nooa.Agent`) built
+like VQASynth's `SpatialAnnotator`: the toolkit functions are the tool surface (NOOA
+derives schemas from signatures + docstrings), and `probe(question)` is a CodeAct
+generation method — the LLM writes Python composing the tools in a sandboxed REPL
+(AST validation, deny-lists, iteration budget, tracing).
+
+- **Geometry-general.** Parameterized by any registered manifold — `lumpy_torus`,
+  `flat_cylinder`, `double_lump`, `gaussian_bump` — and new ones are one
+  `@register_geometry` away (the solver only needs `A(x)`). Experiments thread a
+  `geometry=` param straight through `build_surface`.
+- **Verify-gated.** `probe()` returns a typed `ExperimentResult{metrics, verification,
+  provenance, trustworthy}`; the agent is instructed to call `is_trustworthy(...)` and
+  refine rather than trust a result whose flags fail (the metadata_resolver discipline).
+
+```python
+from nls_torus.agent import ManifoldExperimenter          # needs py3.12 + nooa + GOOGLE_API_KEY
+agent = ManifoldExperimenter(geometry="lumpy_torus", llm="gemini/gemini-2.5-pro")
+res = await agent.probe("Does a defocusing quintic prevent the collapse pure cubic suffers?")
+# -> "Yes … cubic collapsed at t=0.073; cubic+quintic stable (peak→6.2). trustworthy=True"
+#    with per-run metrics + verification, computed live — not asserted from priors.
+```
+
+The deterministic tool functions (`tool_run`, `tool_sweep`, `tool_compare`) run without
+nooa or an LLM, so the tool surface is unit-testable on its own.
+
 ## Numerically-grounded inference
 
 The loop this project ran by hand — *pose a phenomenon → map to control knobs → run →

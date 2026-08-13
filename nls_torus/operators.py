@@ -11,16 +11,21 @@ Extracted and unified from nls_lumpy_torus.build_operators.
 """
 import numpy as np
 import scipy.sparse as sp
-from .geometry import profile_A
+from .geometry import make_geometry
 
 
-def build_surface(Nx=64, Nth=128, Lx=np.pi, x0=-np.pi / 2.0, eps=1.0):
-    """Grid + (K stiffness sparse, Mdiag lumped-mass vector). Node order i*Nth+j."""
+def build_surface(Nx=64, Nth=128, geometry=None, eps=1.0):
+    """Grid + (K stiffness sparse, Mdiag lumped-mass vector) for a surface of revolution.
+    `geometry` is a name (see geometry.GEOMETRIES) or a Geometry object; None defaults to
+    the lumpy torus with the given `eps`. Node order i*Nth+j. Works for any registered
+    (torus-topology) manifold — the assembly only uses A(x) on the grid."""
+    geo = make_geometry("lumpy_torus" if geometry is None else geometry, eps=eps)
+    x0, Lx = geo.x0, geo.Lx
     dx = Lx / Nx
     dth = 2.0 * np.pi / Nth
     x = x0 + dx * np.arange(Nx)
     th = dth * np.arange(Nth)
-    A = profile_A(x, eps)
+    A = np.asarray(geo.A_of(x), float)
 
     # 1-D x-stiffness  int A u_x v_x dx  (periodic, face-averaged A)
     Aface = 0.5 * (A + np.roll(A, -1))
@@ -40,7 +45,8 @@ def build_surface(Nx=64, Nth=128, Lx=np.pi, x0=-np.pi / 2.0, eps=1.0):
     Ith = sp.identity(Nth, format="csr")
     K = (dth * sp.kron(Sx, Ith) + dx * sp.kron(sp.diags(1.0 / A), Sth)).tocsr()
     Mdiag = np.repeat(A, Nth) * dx * dth
-    return dict(x=x, th=th, A=A, K=K, Mdiag=Mdiag, dx=dx, dth=dth, Nx=Nx, Nth=Nth, eps=eps)
+    return dict(x=x, th=th, A=A, K=K, Mdiag=Mdiag, dx=dx, dth=dth, Nx=Nx, Nth=Nth,
+                eps=eps, geometry=geo.name)
 
 
 def ring_grid(Nth=512, radius=1.0):

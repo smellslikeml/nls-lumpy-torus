@@ -220,6 +220,14 @@ It's also an **MCP server** (`mcp_server.py`) with `run_experiment` / `sweep` /
 `compare` verbs — `claude mcp add nls-torus -- python3 mcp_server.py`. A `sweep` returns
 a scaling fit in one call (e.g. Kibble–Zurek `k* ~ τ_Q^{-0.22}`, all points verified).
 
+For questions no registered experiment covers, there's a **generative agent**
+(`nls_torus/agent.py`, `ManifoldExperimenter` — a NVIDIA NOOA `Agent`): `probe(question)`
+has an LLM compose the primitives into a *new* experiment in a sandboxed CodeAct REPL and
+return a verify-gated result. It's **geometry-general** (any registered manifold —
+`lumpy_torus`, `flat_cylinder`, `double_lump`, `gaussian_bump`, or a new
+`@register_geometry`) and models the on-the-fly-experiment loop. Needs Python 3.12 + nooa
++ an LLM key; the deterministic tools run without either.
+
 ## Possible next steps
 
 - True **Newton** for the nonlinearity (real-split `δū` Jacobian) — faster than

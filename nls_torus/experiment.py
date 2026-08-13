@@ -34,12 +34,12 @@ def _git_commit():
 # ------------------------------------------------------------------ experiments
 @register
 def collapse(amp=6.0, eps=1.0, sigma5=0.0, drive_delta=0.0, drive_omega=40.0,
-             Nx=96, Nth=96, dt=1e-3, T=1.5, pk_cap=150.0):
+             Nx=96, Nth=96, dt=1e-3, T=1.5, pk_cap=150.0, geometry="lumpy_torus"):
     """Localized hump under focusing cubic (+ optional quintic sigma5, + optional
-    breathing drive g_eff=g0(1+delta cos Omega t)). Covers bare collapse, nonlinearity
-    management (drive_delta>0), and genuine cubic-quintic arrest (sigma5>0) — one
-    experiment, three regimes."""
-    surf = build_surface(Nx, Nth, eps=eps)
+    breathing drive g_eff=g0(1+delta cos Omega t)) on any registered `geometry`. Covers
+    bare collapse, nonlinearity management (drive_delta>0), and genuine cubic-quintic
+    arrest (sigma5>0) — one experiment, three regimes, any manifold."""
+    surf = build_surface(Nx, Nth, geometry=geometry, eps=eps)
     step = CNStepper(surf, dt, sigma5=sigma5)
     U = fields.localized_hump(surf, amp=amp, k=0)
     M, K = surf["Mdiag"], surf["K"]
@@ -178,9 +178,9 @@ def thouless_pump(J=1.0, delta=0.7, mass=0.9, Nk=400):
 
 
 @register
-def conservation(eps=1.0, Nx=64, Nth=128, dt=2e-3, T=1.0, sigma3=1.0):
-    """Solver validation: mass and energy drift of a wavepacket over a run."""
-    surf = build_surface(Nx, Nth, eps=eps); step = CNStepper(surf, dt)
+def conservation(eps=1.0, Nx=64, Nth=128, dt=2e-3, T=1.0, sigma3=1.0, geometry="lumpy_torus"):
+    """Solver validation on any registered `geometry`: mass and energy drift."""
+    surf = build_surface(Nx, Nth, geometry=geometry, eps=eps); step = CNStepper(surf, dt)
     U = fields.localized_hump(surf, amp=1.0, k=4)
     M, K = surf["Mdiag"], surf["K"]
     hm = [diag.mass(U, M)]; he = [diag.energy(U, K, M, sigma3)]
@@ -220,10 +220,12 @@ def revival(Nth=256, k0=6, wth=0.5):
 
 
 @register
-def geodesic_stability(k=6, amp=0.9, wx=0.25, Nx=80, Nth=160, dt=2e-3, T=3.0):
-    """Beam along the elliptic (belly) vs hyperbolic (neck) parallel geodesic: transverse
-    width stays bounded on the stable orbit, grows on the unstable one."""
-    surf = build_surface(Nx, Nth); step = CNStepper(surf, dt)
+def geodesic_stability(k=6, amp=0.9, wx=0.25, Nx=80, Nth=160, dt=2e-3, T=3.0,
+                       geometry="lumpy_torus"):
+    """Beam along the elliptic (belly) vs hyperbolic (neck) parallel geodesic on any
+    registered `geometry`: transverse width bounded on the stable orbit, grows on the
+    unstable one."""
+    surf = build_surface(Nx, Nth, geometry=geometry); step = CNStepper(surf, dt)
     x, A, dx, dth = surf["x"], surf["A"], surf["dx"], surf["dth"]
     Nx_, Nth_, Lx = surf["Nx"], surf["Nth"], np.pi
 
@@ -443,4 +445,56 @@ def run(name, **params):
     out.update(experiment=name, params=params,
                provenance={"solver": "nls_torus", "git_commit": _git_commit(),
                            "note": "reduced mean-field model; results need validation vs full physics"})
+    return _clean(out)
+
+
+def verified(ver):
+    """A result is 'verified' iff every boolean trust-flag it reports is True."""
+    flags = [v for v in ver.values() if isinstance(v, bool)]
+    return all(flags) if flags else True
+
+
+def sweep(name, param, values, base_params=None, metric=None):
+    """Scan one parameter over `values`; per-value metric + verification, plus a log-log
+    scaling fit when both axes are positive numeric (e.g. Kibble-Zurek k* ~ tau_Q^b)."""
+    base_params = base_params or {}
+    results = []
+    for v in values:
+        try:
+            r = run(name, **{**base_params, param: v}); m = r["metrics"]
+            results.append({"value": v, "metric": (m.get(metric) if metric else None),
+                            "metrics": m, "verification": r["verification"],
+                            "verified": verified(r["verification"]), "summary": r["summary"]})
+        except Exception as e:
+            results.append({"value": v, "error": str(e)})
+    out = {"experiment": name, "param": param, "metric": metric, "results": results,
+           "all_verified": all(rr.get("verified", False) for rr in results if "error" not in rr)}
+    if metric:
+        xs = [rr["value"] for rr in results if isinstance(rr.get("value"), (int, float))
+              and isinstance(rr.get("metric"), (int, float)) and rr["value"] > 0 and rr["metric"] > 0]
+        ys = [rr["metric"] for rr in results if isinstance(rr.get("value"), (int, float))
+              and isinstance(rr.get("metric"), (int, float)) and rr["value"] > 0 and rr["metric"] > 0]
+        if len(xs) >= 3:
+            b, c = np.polyfit(np.log(xs), np.log(ys), 1)
+            out["scaling"] = {"form": f"{metric} ~ {param}^({b:.3f})", "exponent": float(b)}
+    return _clean(out)
+
+
+def compare(name, configs, metric=None):
+    """Run several labelled configs of one experiment side by side; flag which extremises
+    the metric. `configs` maps a label -> params dict."""
+    res = {}
+    for label, params in configs.items():
+        try:
+            r = run(name, **params)
+            res[label] = {"metric": (r["metrics"].get(metric) if metric else None),
+                          "metrics": r["metrics"], "verification": r["verification"],
+                          "verified": verified(r["verification"]), "summary": r["summary"]}
+        except Exception as e:
+            res[label] = {"error": str(e)}
+    out = {"experiment": name, "metric": metric, "configs": res}
+    if metric:
+        scored = {k: v["metric"] for k, v in res.items() if isinstance(v.get("metric"), (int, float))}
+        if scored:
+            out["max_label"] = max(scored, key=scored.get); out["min_label"] = min(scored, key=scored.get)
     return _clean(out)
