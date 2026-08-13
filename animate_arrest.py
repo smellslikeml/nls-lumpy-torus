@@ -23,8 +23,8 @@ amp, delta, Om = float(d["amp"]), float(d["delta"]), float(d["Om"])
 def field(U):
     return np.abs(U.reshape(Nx, Nth)) ** 2
 
-VMAX = 60.0                          # initial peak ~amp^2=33.6; collapse saturates, breather visible
-T_SHOW = 1.2
+VMAX = 20.0                          # low enough that the settled breather stays visible;
+T_SHOW = 1.2                         # the initial hump (~34) and the collapse saturate to max
 idx = [i for i, t in enumerate(mt) if t <= T_SHOW]
 frames = []
 for i in idx:
