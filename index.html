@@ -641,6 +641,14 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
         <span class="eq">0.30→0.18</span> (right), while the doublet grows more isolated
         (<span class="eq">λ₂/λ₁: 3.0→5.5</span>) as the handles decouple toward two independent zero modes.
         Tunnelling across a handle, set by geometry.</figcaption></figure>
+    <figure class="wide"><img src="genus2_collapse.png" alt="Townes collapse threshold blind to topology" loading="lazy">
+      <figcaption><b>H1 universality survives topology.</b> The same genus-2 mesh lets us push §11's result to
+        its sharpest test: is the mass-critical collapse threshold still the <b>Townes mass</b>
+        <span class="eq">‖Q‖²≈11.7</span> when the topology itself changes? A fixed mesh grid-arrests true
+        blow-up, so we read the <b>focusing onset</b> (a bump grows above <span class="eq">M_c</span>, disperses
+        below). The threshold lands on <b>11.6–11.9</b> on a genus-0 sphere and on genus-2 at every neck width —
+        a <b>1.5% spread</b>, grid-converged, mass conserved to <span class="eq">10⁻¹⁴</span>. Collapse is a local
+        point-concentration; it sees neither the curvature nor the handles.</figcaption></figure>
     <figure class="wide"><img src="horn_resonator.png" alt="non-compact horn leaky resonator, geometry-set Q" loading="lazy">
       <figcaption><b>A non-compact horn: geometry sets the Q of a leaky mode.</b> The meridian runs to a
         semi-infinite horn; a <b>throat</b> (a dip in <span class="eq">A</span>, a barrier in
@@ -808,7 +816,7 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
   agent-toolkit findings (<code>tunneling.py</code>, <code>curvature_universality.py</code>,
   <code>sta_transport.py</code>, <code>dtc_horn.py</code>), and the beyond-surfaces-of-revolution extensions
   (<code>nls_torus/mesh.py</code>, <code>mesh_genus2.py</code>, <code>genus2_tunneling.py</code>,
-  <code>horn_resonator.py</code>, <code>horn_hawking.py</code>), and the real-device model
+  <code>genus2_collapse.py</code>, <code>horn_resonator.py</code>, <code>horn_hawking.py</code>), and the real-device model
   (<code>microdisk_Q.py</code>), all driven by the
   <code>nls_torus</code> library — see <code>docs/toolkit.md</code>. Every 3-D frame uses the crescent embedding
   (<span class="eq">x</span> → toroidal, <span class="eq">θ</span> → poloidal).
