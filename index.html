@@ -391,6 +391,13 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
       <figcaption><b>Break the axisymmetry, break integrability.</b> Adding a θ-lump shatters the nested KAM
         curves into a chaotic sea with a surviving belly island — the classical stage for quantum scarring
         of the eigenfunctions, and for nonlinear transport in a mixed phase space.</figcaption></figure>
+    <figure class="wide"><img src="quantum_chaos.png" alt="quantum chaos: level statistics and eigenstates" loading="lazy">
+      <figcaption><b>The quantum face of that chaos.</b> Diagonalising <span class="eq">−Δ_g + λV(x,θ)</span>
+        with a generic <span class="eq">θ</span>-lump: as the lump strengthens, the nearest-neighbour
+        level-spacing statistics cross from <b>clustering</b> (the symmetric surface's <span class="eq">±k</span>
+        degeneracy, left) to the <b>Wigner–GOE</b> distribution with hard <b>level repulsion</b> (middle) — the
+        universal fingerprint of quantum chaos — and the eigenstates turn irregular (right). The same story as
+        the classical Poincaré section above, read straight off the spectrum.</figcaption></figure>
     <figure class="wide"><img src="lattice.png" alt="geometric lattice and Anderson" loading="lazy">
       <figcaption><b>Corrugation is an intrinsic lattice.</b> A periodic lump chain makes
         <span class="eq">V_k=k²/A²</span> a periodic potential → whispering-gallery <b>Bloch bands</b> with
@@ -473,6 +480,14 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
       attractive BECs (the "Bosenova"), in self-focusing / <b>filamentation</b> of intense laser beams, and in
       Langmuir-wave collapse in plasmas — the reduced-model bridge to the fusion-adjacent question (§10, dynamical
       lens). Full cites in §11.</div>
+    <figure class="wide"><img src="cubic_quintic.png" alt="cubic-quintic prevents collapse outright" loading="lazy">
+      <figcaption><b>Prevention, not just delay — the cubic-quintic resolution.</b> The management panels only
+        <i>delayed</i> the collapse; adding a <b>defocusing quintic</b> term (<span class="eq">σ₅|u|⁴u</span>,
+        repulsive only at high density) removes the collapse threshold outright. The same hump that
+        Townes-collapses under pure cubic settles into a <b>stable soliton with no drive at all</b> (left), and
+        cubic+quintic stays stable at <i>every</i> mass while pure cubic collapses above
+        <span class="eq">M_c</span> (right). The clean way to genuinely <i>prevent</i> 2-D collapse — matching
+        the rigorous delay-vs-prevent result above; connects to condensates with three-body repulsion.</figcaption></figure>
     <figure class="wide"><img src="rogue.png" alt="rogue waves and Peregrine breather on the belly ring" loading="lazy">
       <figcaption><b>Rogue waves on the belly ring.</b> Seed the focusing ring's longest-wavelength unstable
         mode and modulational instability grows it into an <b>Akhmediev breather</b> — a wave that rises from
@@ -587,7 +602,8 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
   <code>expanding_torus.py</code>, <code>analog_horizon.py</code>, <code>dispersion_design.py</code>,
   <code>lattice.py</code>, <code>topological.py</code>, <code>neural_operator.py</code>,
   <code>dynamical_stabilization.py</code>, <code>collapse_arrest.py</code>, <code>floquet.py</code>,
-  <code>thouless.py</code>, <code>rogue.py</code>). Every 3-D frame uses the crescent embedding
+  <code>thouless.py</code>, <code>rogue.py</code>, <code>cubic_quintic.py</code>,
+  <code>quantum_chaos.py</code>). Every 3-D frame uses the crescent embedding
   (<span class="eq">x</span> → toroidal, <span class="eq">θ</span> → poloidal).
 </footer>
 
