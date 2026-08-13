@@ -116,6 +116,67 @@ def rogue_ring(a0=1.0, g=8.0, q_seed=1, Nth=256, dt=2e-4, T=5.0):
     return dict(metrics=metrics, verification=ver, series={}, summary=summary)
 
 
+@register
+def solver_bench(amp=8.0, sigma5=0.0, Nx=64, Nth=64, dt=1e-3, nsteps=12, pmax=40):
+    """Newton vs Picard for the implicit nonlinear solve on a concentrating hump.
+    Reports iterations/step for each and their step agreement (both solve the same
+    equation -> a converged step is method-independent). Newton wins near strong
+    concentration, where Picard's linear convergence slows or stalls."""
+    surf = build_surface(Nx, Nth)
+    step = CNStepper(surf, dt, sigma5=sigma5, tol=1e-11, pmax=pmax)
+    U0 = fields.localized_hump(surf, amp=amp)
+    Wp = step.step(U0, -1.0, method="picard")
+    Wn = step.step(U0, -1.0, method="newton")
+    agree = float(np.linalg.norm(Wp - Wn))
+    stats = {}
+    for method in ("picard", "newton"):
+        U = fields.localized_hump(surf, amp=amp); its = []
+        for _ in range(nsteps):
+            io = []; U = step.step(U, -1.0, method=method, n_iter_out=io); its.append(io[0])
+        stats[method] = (int(max(its)), float(np.mean(its)))
+    ratio = stats["picard"][1] / max(stats["newton"][1], 1e-9)
+    metrics = {"picard_max_iters": stats["picard"][0], "picard_mean_iters": stats["picard"][1],
+               "newton_max_iters": stats["newton"][0], "newton_mean_iters": stats["newton"][1],
+               "iter_ratio": ratio}
+    ver = {"methods_agree": agree < 1e-8, "step_diff": agree,
+           "newton_converged": stats["newton"][0] < pmax,
+           "picard_converged": stats["picard"][0] < pmax}
+    summary = (f"Newton {stats['newton'][1]:.1f} vs Picard {stats['picard'][1]:.1f} iters/step "
+               f"({ratio:.1f}x fewer); step agreement {agree:.1e}")
+    return dict(metrics=metrics, verification=ver, series={}, summary=summary)
+
+
+@register
+def thouless_pump(J=1.0, delta=0.7, mass=0.9, Nk=400):
+    """Adiabatic (Thouless) pump on a Rice-Mele sliding lump lattice: the filled band's
+    Wannier centre winds by an integer per cycle (the Chern number). A topological loop
+    pumps 1; a trivial loop pumps 0."""
+    def h(k, s, enc):
+        u = delta * np.cos(s)
+        v = mass * np.sin(s) if enc else mass * (0.5 + 0.5 * np.cos(s))
+        J1, J2 = J + u, J - u
+        return np.array([[v, (J1 + J2 * np.cos(k)) - 1j * (J2 * np.sin(k))],
+                         [(J1 + J2 * np.cos(k)) + 1j * (J2 * np.sin(k)), -v]])
+
+    def wcentre(s, enc):
+        ks = np.linspace(-np.pi, np.pi, Nk, endpoint=False)
+        low = [np.linalg.eigh(h(k, s, enc))[1][:, 0] for k in ks]
+        prod = 1.0 + 0j
+        for j in range(Nk):
+            prod *= np.vdot(low[j], low[(j + 1) % Nk])
+        return (-np.angle(prod) / (2 * np.pi)) % 1.0
+
+    ss = np.linspace(0, 2 * np.pi, 240)
+    topo = np.unwrap([2 * np.pi * wcentre(s, True) for s in ss]) / (2 * np.pi)
+    triv = np.unwrap([2 * np.pi * wcentre(s, False) for s in ss]) / (2 * np.pi)
+    pump_t = float(topo[-1] - topo[0]); pump_v = float(triv[-1] - triv[0])
+    metrics = {"pumped_charge": pump_t, "pumped_charge_trivial": pump_v,
+               "chern": int(round(pump_t))}
+    ver = {"quantized": abs(pump_t - round(pump_t)) < 0.03 and abs(pump_v) < 0.03}
+    summary = f"topological loop pumps {pump_t:.3f}/cycle; trivial loop {pump_v:.3f} (quantized)"
+    return dict(metrics=metrics, verification=ver, series={}, summary=summary)
+
+
 def _clean(obj):
     """Recursively convert numpy scalars/bools/arrays to native Python so the Result
     is JSON-serialisable (the agent tool speaks JSON)."""

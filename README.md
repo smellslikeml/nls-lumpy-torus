@@ -198,12 +198,14 @@ geometry. All `*_torus.gif` render on it.
 ## Toolkit — modular library + agent tool
 
 The gallery scripts are refactored into a reusable package **`nls_torus/`** (geometry /
-operators / one pluggable-nonlinearity stepper / fields / diagnostics+verification /
-Bogoliubov / declarative experiments) and a self-describing tool
-**`experiment_tool.py`** (`run_experiment`) that returns `{metrics, verification,
-provenance}` as JSON — a substrate for **numerically-grounded inference**: run an
-experiment, reason over the numbers and the trust signals, not priors. See
-[`docs/toolkit.md`](docs/toolkit.md).
+operators / a Crank–Nicolson stepper with **Picard *or* Newton** nonlinear solve /
+fields / diagnostics+verification / Bogoliubov / declarative experiments) and a
+self-describing tool **`experiment_tool.py`** (`run_experiment`) that returns `{metrics,
+verification, provenance}` as JSON — a substrate for **numerically-grounded inference**:
+run an experiment, reason over the numbers and the trust signals, not priors. See
+[`docs/toolkit.md`](docs/toolkit.md). Experiments: `collapse` (bare / managed /
+cubic-quintic), `expanding_cosmos`, `rogue_ring`, `kz_freeze`, `solver_bench`
+(Newton vs Picard), `thouless_pump`.
 
 ```
 python3 experiment_tool.py --list

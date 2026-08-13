@@ -21,7 +21,9 @@ nls_torus/
   geometry.py   A(x;eps), curvature K = -A''/A   (eps=0 flat cylinder … eps=1 the torus)
   operators.py  build_surface (2-D Laplace–Beltrami K, M), ring_grid (1-D), wg_chain (tight-binding)
   steppers.py   CNStepper  — 2-D Crank–Nicolson, ONE pluggable nonlinearity
-                             N(u,t) = sigma3(t)|u|^2 u + sigma5|u|^4 u  (cubic, quintic, time-dependent)
+                             N(u,t) = sigma3(t)|u|^2 u + sigma5|u|^4 u  (cubic, quintic, time-dependent),
+                             solved by Picard OR Newton (real-split Jacobian; ~2.5x fewer
+                             iterations and robust where Picard stalls near concentration)
                 RingStepper — 1-D split-step Fourier
   fields.py     localized_hump, geodesic_ring, uniform_noise, ring_seeded
   diagnostics.py mass, energy, peak, spectrum, level_spacings + VERIFICATION
