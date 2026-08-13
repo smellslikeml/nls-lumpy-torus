@@ -327,13 +327,13 @@ def _make_experimenter_class(max_iterations=DEFAULT_MAX_ITERATIONS, **class_kwar
             number. You may search_arxiv(...) to check an expected value or universality
             class against the literature — but the RUN is the evidence.
 
-            The returned ExperimentResult MUST populate `metrics` (the numbers you
-            computed) and `verification` (the trust flags — ALWAYS include a check such as
-            diagnostics.conservation_drift / a Wronskian / a grid-refinement comparison; an
-            EMPTY verification is treated as UNVERIFIED and is not trustworthy). Set
-            trustworthy = is_trustworthy(result.verification). If you cannot verify a
-            claim (e.g. a narrow packet may just be under-resolved), say so and set
-            trustworthy=False. Never assert physics you did not compute and verify here."""
+            The returned ExperimentResult MUST populate `metrics` and `verification`.
+            When you use compose(), it returns harness-COMPUTED {metrics, verification,
+            trustworthy}: copy those three fields VERBATIM into your ExperimentResult — do
+            not recompute, second-guess, or override them (the harness owns the trust
+            flags). When you use run_experiment/sweep, set trustworthy =
+            is_trustworthy(the verification it returned). An empty verification is
+            UNVERIFIED. Never assert physics you did not compute and verify here."""
             ...
     return _ManifoldExperimenter
 
