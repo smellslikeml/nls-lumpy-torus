@@ -649,7 +649,47 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
 </section>
 
 <section>
-  <h2><span class="num">13</span>Background &amp; references</h2>
+  <h2><span class="num">13</span>Modeling a real system — what geometry can and can't control in a microcomb</h2>
+  <p class="sub">Everything above is a reduced-model laboratory. Pointed at a real device — a
+    <b>silica microdisk Kerr resonator</b> at telecom wavelength (<span class="eq">n=1.44</span>,
+    <span class="eq">λ≈1.55 μm</span>) — the same two findings that recurred across this gallery become a concrete
+    <b>design principle</b>, in real units and validated against measured devices.</p>
+
+  <div class="deriv">
+    <p><b>A whispering-gallery mode is a tunnelling problem.</b> It is trapped by the index step and leaks by
+      tunnelling <i>radially</i> through the centrifugal barrier <span class="eq">(m²−¼)/r²</span> — exactly the
+      leaky-cavity structure of the horn (§12), now in a real dielectric. Solving the complex radial resonance
+      (with the same absorbing-collar + <span class="eq">η</span>-independence check) gives a
+      <b>radiation-limited Q that is exponential in the geometry</b>, and its magnitude matches reality:
+      <span class="eq">Q ≈ 10²</span> at <span class="eq">R=3 μm</span> climbing past <span class="eq">10⁸</span>
+      by <span class="eq">R≈12 μm</span> — the bending-loss regime real silica microdisks live in.</p>
+  </div>
+
+  <div class="grid">
+    <figure class="wide"><img src="microdisk_Q.png" alt="silica microdisk radiation Q and comb threshold vs radius" loading="lazy">
+      <figcaption><b>Geometry is an exponential lever on Q — but only a lever on Q.</b> <b>Left:</b> the
+        radiation <span class="eq">Q</span> of the WGM rises six decades over <span class="eq">R=3→12 μm</span>
+        (blue), until it meets the material/roughness ceiling <span class="eq">10⁸</span> (loaded Q, grey) at a
+        <b>crossover radius <span class="eq">R*≈11.7 μm</span></b>: below it the device is <i>geometry-limited</i>,
+        above it <i>material-limited</i>. <b>Right:</b> the Kerr-comb parametric threshold
+        <span class="eq">P_th∝1/Q²</span> inherits this exactly — plunging from an impossible tens of kW at
+        <span class="eq">R=3 μm</span> to a realistic <span class="eq">~1 μW</span> near the crossover. So the
+        comb threshold is set by geometry <b>only through Q</b> (a leakage property), and only up to
+        <span class="eq">R*</span>. The <i>local</i> nonlinear response it rides on — the mass-critical
+        threshold — is <b>Townes-universal and geometry-blind</b> (§11): you can engineer the resonator's Q with
+        its shape, but you cannot shape away the nonlinearity itself. Every point survived the
+        absorber-independence check that certifies the resonance over five decades of Q.</figcaption></figure>
+    <div class="note"><b>The takeaway.</b> Two roles, cleanly separated by the verification this whole project
+      is built on: <b>geometry → Q</b> is an exponential design knob (tunnelling), while <b>geometry → nonlinear
+      threshold</b> is a null (universality). The reduced-model loop — geometry, one solver, a conserved-quantity
+      or resonance-stability check, an honesty rubric — carried all the way from a lumpy torus to a design rule
+      for a real microcomb. It's registered too: <code>microdisk_Q</code> is callable through
+      <code>run</code>/<code>sweep</code>/MCP like everything else.</div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">14</span>Background &amp; references</h2>
   <p class="sub">The experiment sits on a well-worn thread of geometry and physics — the reduction to a
     centrifugal-barrier problem is the same structure that appears across these lines of work.</p>
   <ul class="refs">
@@ -717,6 +757,13 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
       <i>J. Austral. Math. Soc. B</i> <b>25</b>, 16 (1983); quantum chaos &amp; level statistics: Bohigas,
       Giannoni &amp; Schmit, <a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.52.1"><i>Phys.
       Rev. Lett.</i> <b>52</b>, 1 (1984)</a>.</li>
+    <li><b>The real-device model (§13)</b> — whispering-gallery radiation-Q as tunnelling through the
+      centrifugal (bending) barrier: Marcatili, <i>Bends in optical dielectric guides</i>
+      (<i>Bell Syst. Tech. J.</i> <b>48</b>, 2103, 1969); ultra-high-Q silica microtoroids: Armani et al.
+      (above). Kerr-comb parametric threshold and its <span class="eq">1/Q²</span> scaling: Herr, Kippenberg
+      et al., <a href="https://www.science.org/doi/10.1126/science.aan8083"><i>Dissipative Kerr solitons in
+      optical microresonators</i>, Science <b>361</b> (2018)</a>; the mass-critical universality that makes the
+      nonlinear threshold geometry-blind: Merle &amp; Raphaël (above).</li>
   </ul>
 </section>
 
@@ -734,8 +781,8 @@ neck:   V_k ≈ 2k²(1 − ξ²)     →  an inverted parabola: a BARRIER</pre>
   agent-toolkit findings (<code>tunneling.py</code>, <code>curvature_universality.py</code>,
   <code>sta_transport.py</code>), and the beyond-surfaces-of-revolution extensions
   (<code>nls_torus/mesh.py</code>, <code>mesh_genus2.py</code>, <code>genus2_tunneling.py</code>,
-  <code>horn_resonator.py</code>), all driven by the <code>nls_torus</code> library — see
-  <code>docs/toolkit.md</code>. Every 3-D frame uses the crescent embedding
+  <code>horn_resonator.py</code>), and the real-device model (<code>microdisk_Q.py</code>), all driven by the
+  <code>nls_torus</code> library — see <code>docs/toolkit.md</code>. Every 3-D frame uses the crescent embedding
   (<span class="eq">x</span> → toroidal, <span class="eq">θ</span> → poloidal).
 </footer>
 

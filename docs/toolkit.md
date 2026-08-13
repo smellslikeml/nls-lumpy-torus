@@ -39,6 +39,9 @@ Beyond the genus-1 metric `ds^2=dx^2+A(x)^2 dtheta^2`, three registered experime
 `mesh.py`/CAP: `sta_transport` (shortcut-to-adiabaticity soliton transport), `genus2_tunneling`
 (which-handle doublet splitting on a true genus-2 surface — H4 on higher genus), and
 `horn_resonator` (geometry-set Q of a leaky mode in an open horn, gated by absorber-independence).
+And `microdisk_Q` takes it to a real device: the radiation-limited Q of a silica-microdisk
+whispering-gallery mode (as radial tunnelling) + the Kerr-comb threshold `P_th ~ 1/Q^2`, showing
+geometry is an exponential lever on Q but a null on the Townes-universal nonlinear threshold.
 
 ```python
 import nls_torus as nt

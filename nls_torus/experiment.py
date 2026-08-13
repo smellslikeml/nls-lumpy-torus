@@ -498,6 +498,44 @@ def horn_resonator(Delta=0.40, throat_w=1.0, k=2.0, Xmax=40.0, xt=8.0, Xpml=30.0
                 series={}, summary=f"leaky horn resonance E_r={e.real:.3f}, Q={Q:.0f} (eta-stable)")
 
 
+@register
+def microdisk_Q(R=8.0, n_disk=1.44, lam0=1.55, Q_mat=1e8):
+    """Radiation-limited Q of a silica-microdisk whispering-gallery mode near lam0 (um) as
+    geometric tunnelling through the centrifugal barrier (m^2-1/4)/r^2: a leaky complex
+    radial resonance found with an absorbing collar (CAP), its trust flag the absorber
+    (eta) independence. Returns radiation Q, loaded Q (with a material/roughness ceiling
+    Q_mat), and the Kerr-comb parametric threshold estimate P_th ~ 1/Q^2 in uW. Radiation Q
+    is an EXPONENTIAL geometric lever; the local nonlinear threshold is not (Townes-
+    universal — see collapse/H1). sweep over R to see Q climb ~10^2 -> 10^8 across 3-12 um."""
+    import scipy.sparse as _sp
+    from scipy.sparse.linalg import eigs as _eigs
+    k0 = 2 * np.pi / lam0
+
+    def _Q(eta, N=2600):
+        m = round(1.27 * k0 * R); rmax = 1.7 * m / k0 + 8.0; rpml = 1.7 * m / k0 + 3.0
+        r = np.linspace(0.02, rmax, N); dr = r[1] - r[0]
+        n2 = np.where(r <= R, n_disk ** 2, 1.0); Vc = (m ** 2 - 0.25) / r ** 2
+        cap = eta * np.clip((r - rpml) / (rmax - rpml), 0, None) ** 2
+        A = _sp.diags([-1 / dr ** 2 * np.ones(N - 1), 2 / dr ** 2 + Vc - 1j * cap,
+                       -1 / dr ** 2 * np.ones(N - 1)], [-1, 0, 1]).tocsc()
+        v, vv = _eigs(A, k=16, M=_sp.diags(n2).tocsc(), sigma=k0 ** 2)
+        cand = [(e.real / (-e.imag), 2 * np.pi / np.sqrt(e.real), m) for e, vc in zip(v, vv.T)
+                if e.real > 0 and e.imag < 0 and 0.75 * R < r[np.argmax(np.abs(vc))] < 1.03 * R]
+        return max(cand, key=lambda t: t[0]) if cand else None
+
+    a, b = _Q(6.0), _Q(10.0)
+    if a is None or b is None:
+        return dict(metrics={"Q_rad": None}, verification={"resonance_found": False},
+                    series={}, summary="no WGM resonance found")
+    Qr, lam, m = a; rel = abs(a[0] - b[0]) / a[0]; Qt = 1.0 / (1.0 / Qr + 1.0 / Q_mat)
+    V = 2 * np.pi * (R * 1e-6) * 1e-12; omega = 2 * np.pi * 3e8 / (lam0 * 1e-6)
+    Pth = n_disk ** 2 * V * omega / (8 * 2.6e-20 * 3e8 * Qt ** 2) * 1e6
+    return dict(metrics={"Q_rad": float(Qr), "Q_loaded": float(Qt), "wavelength_um": float(lam),
+                         "m": int(m), "P_th_uW": float(Pth)},
+                verification={"resonance_found": True, "eta_stable": rel < 0.25},
+                series={}, summary=f"R={R}um WGM lam={lam:.3f}um: Q_rad={Qr:.2e}, P_th~{Pth:.2g}uW")
+
+
 def _clean(obj):
     """Recursively convert numpy scalars/bools/arrays to native Python so the Result
     is JSON-serialisable (the agent tool speaks JSON)."""
